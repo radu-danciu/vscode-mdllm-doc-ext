@@ -1,0 +1,135 @@
+{
+  "name": "vscode-mdllm-doc-ext",
+  "displayName": "External Markdown Docs",
+  "description": "VS Code extension for hover docs and documentation navigation backed by external Markdown files.",
+  "version": "1.0.0",
+  "publisher": "SprocketInc",
+  "author": "Radu Danciu <radu.danciu@sprocket.ro>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/radu-danciu/vscode-mdllm-doc-ext.git"
+  },
+  "homepage": "https://github.com/radu-danciu/vscode-mdllm-doc-ext",
+  "bugs": {
+    "url": "https://github.com/radu-danciu/vscode-mdllm-doc-ext/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "documentation",
+    "markdown",
+    "hover",
+    "definition",
+    "typescript",
+    "python",
+    "csharp",
+    "cpp"
+  ],
+  "activationEvents": [
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:csharp",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:python",
+    "onCommand:externalDocs.createSymbolDocumentation",
+    "onCommand:externalDocs.openSymbolDocumentation",
+    "onCommand:externalDocs.rebuildIndex"
+  ],
+  "main": "./out/src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "externalDocs.createSymbolDocumentation",
+        "title": "Create Symbol Documentation"
+      },
+      {
+        "command": "externalDocs.openSymbolDocumentation",
+        "title": "Open Symbol Documentation"
+      },
+      {
+        "command": "externalDocs.rebuildIndex",
+        "title": "Rebuild Documentation Index"
+      }
+    ],
+    "configuration": {
+      "title": "External Markdown Docs",
+      "properties": {
+        "externalDocs.codeRoot": {
+          "type": "string",
+          "default": ".",
+          "description": "Workspace-relative source root used to mirror source files into docs paths."
+        },
+        "externalDocs.docsRoot": {
+          "type": "string",
+          "default": "docs/api",
+          "description": "Workspace-relative root where generated and maintained Markdown docs live."
+        },
+        "externalDocs.openMode": {
+          "type": "string",
+          "enum": [
+            "split",
+            "main"
+          ],
+          "default": "split",
+          "description": "How explicit documentation commands open Markdown documents."
+        },
+        "externalDocs.languageBuckets.cpp": {
+          "type": "string",
+          "default": "cpp",
+          "description": "Docs bucket name for C and C++ files."
+        },
+        "externalDocs.languageBuckets.csharp": {
+          "type": "string",
+          "default": "csharp",
+          "description": "Docs bucket name for C# files."
+        },
+        "externalDocs.languageBuckets.typescript": {
+          "type": "string",
+          "default": "ts",
+          "description": "Docs bucket name for TypeScript files."
+        },
+        "externalDocs.languageBuckets.javascript": {
+          "type": "string",
+          "default": "js",
+          "description": "Docs bucket name for JavaScript files."
+        },
+        "externalDocs.languageBuckets.python": {
+          "type": "string",
+          "default": "python",
+          "description": "Docs bucket name for Python files."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "test:unit": "node ./out/test/runUnitTests.js",
+    "test:integration": "node ./out/test/integration/runTest.js",
+    "test": "npm run compile && npm run test:unit && npm run test:integration",
+    "package:vsix": "mkdir -p dist && vsce package -o dist/vscode-mdllm-doc-ext.vsix",
+    "release:info": "node ./scripts/release-info.cjs",
+    "release:bump": "node ./scripts/bump-version.cjs",
+    "release:tag": "node ./scripts/tag-release.cjs",
+    "release:verify-tag": "node ./scripts/verify-release-tag.cjs",
+    "package:release": "node ./scripts/package-release.cjs",
+    "publish:release": "node ./scripts/publish-release.cjs"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.6.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
+    "mocha": "^11.7.4",
+    "typescript": "^5.9.3"
+  }
+}

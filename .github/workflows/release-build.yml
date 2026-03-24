@@ -1,0 +1,57 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: npm run release:verify-tag
+
+      - name: Run tests
+        run: npm test
+
+      - name: Package release artifact
+        run: npm run package:release
+
+      - name: Resolve release metadata
+        id: release_info
+        run: |
+          artifact_path="$(npm run --silent release:info -- --field artifactPath)"
+          echo "artifact_path=$artifact_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-build
+          path: ${{ steps.release_info.outputs.artifact_path }}
+
+      - name: Publish GitHub release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.release_info.outputs.artifact_path }}
+          generate_release_notes: true

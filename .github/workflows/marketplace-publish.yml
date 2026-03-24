@@ -1,0 +1,79 @@
+name: Marketplace Publish
+
+on:
+  workflow_run:
+    workflows:
+      - Release Build
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Git tag to publish, for example v1.0.0.abcd123
+        required: true
+        type: string
+
+jobs:
+  publish_from_release_build:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require VSCE_PAT for marketplace publish
+        if: secrets.VSCE_PAT == ''
+        run: |
+          echo "VSCE_PAT repository secret is required for marketplace publish."
+          exit 1
+
+      - name: Download packaged VSIX from release build
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix-build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: dist
+
+      - name: Publish to VS Code Marketplace
+        run: npx vsce publish --packagePath dist/*.vsix --pat "$VSCE_PAT"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+  publish_manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require VSCE_PAT for marketplace publish
+        if: secrets.VSCE_PAT == ''
+        run: |
+          echo "VSCE_PAT repository secret is required for marketplace publish."
+          exit 1
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify release tag
+        env:
+          GITHUB_REF_NAME: ${{ inputs.release_tag }}
+        run: npm run release:verify-tag
+
+      - name: Package release artifact
+        run: npm run package:release
+
+      - name: Publish to VS Code Marketplace
+        run: npx vsce publish --packagePath dist/*.vsix --pat "$VSCE_PAT"
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

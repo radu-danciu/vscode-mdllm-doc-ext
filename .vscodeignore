@@ -1,0 +1,11 @@
+.gitignore
+.vscode/**
+.vscode-test/**
+.github/**
+docs/foundation/**
+node_modules/**
+out/test/**
+scripts/**
+src/dogfood/**
+test/**
+tsconfig.json

@@ -1,0 +1,8 @@
+node_modules/
+out/
+dist/
+.vscode-test/
+.vscode/
+.DS_Store
+docs/foundation/
+docs/agent_governance/
