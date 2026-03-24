@@ -1,6 +1,6 @@
-# showcase/python/showcase.py
+## showcase/python/showcase.py
 
-## showcase.python.showcase.BaseVector
+### `showcase.python.showcase.BaseVector`
 
 Brief: Base Python showcase type used to demonstrate documented inheritance chains.
 
@@ -9,7 +9,7 @@ This class keeps the Python sample valid and small while still exercising type d
 
 ---
 
-## showcase.python.showcase.ShowcaseVector
+### `showcase.python.showcase.ShowcaseVector`
 
 Brief: Dataclass-backed Python showcase vector type.
 
@@ -17,11 +17,12 @@ Details:
 Hover the class or its method to verify that mirrored markdown docs resolve correctly for Python symbols in this repository.
 
 Inheritance:
-- BaseVector
+
+- `BaseVector`
 
 ---
 
-## showcase.python.showcase.ShowcaseVector.length(self) -> float
+### `showcase.python.showcase.ShowcaseVector.length(self) -> float`
 
 Brief: Returns the absolute length of the Python showcase vector.
 
@@ -33,7 +34,7 @@ Absolute numeric magnitude.
 
 ---
 
-## showcase.python.showcase.normalize_showcase(value: float) -> float
+### `showcase.python.showcase.normalize_showcase(value: float) -> float`
 
 Brief: Normalizes a numeric input in the Python showcase module.
 
@@ -41,6 +42,7 @@ Details:
 Hover the declaration or the call site inside `demo_usage` to verify definition-backed markdown lookup.
 
 Params:
+
 - `value`: Input number to normalize.
 
 Returns:
@@ -48,7 +50,7 @@ Absolute numeric value.
 
 ---
 
-## showcase.python.showcase.demo_usage() -> float
+### `showcase.python.showcase.demo_usage() -> float`
 
 Brief: Executes a small Python call path that touches the documented showcase symbols.
 

@@ -1,6 +1,6 @@
-# src/core/config.ts
+## src/core/config.ts
 
-## getConfig(workspaceFolder: vscode.WorkspaceFolder) -> ExternalDocsConfig
+### `getConfig(workspaceFolder: vscode.WorkspaceFolder) -> ExternalDocsConfig`
 
 Brief: Reads the extension settings for a workspace and returns a normalized config object.
 

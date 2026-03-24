@@ -1,6 +1,6 @@
-# showcase/csharp/Showcase.cs
+## showcase/csharp/Showcase.cs
 
-## Showcase.Services.Calculator
+### `Showcase.Services.Calculator`
 
 Brief: Small C# showcase service used to demonstrate documented type and method lookup.
 
@@ -9,7 +9,7 @@ Hover the class or its methods to verify mirrored markdown behavior for repo-loc
 
 ---
 
-## string Showcase.Services.Calculator.Format(string label)
+### `string Showcase.Services.Calculator.Format(string label)`
 
 Brief: Formats a showcase label inside the C# sample.
 
@@ -17,6 +17,7 @@ Details:
 Use this method to validate declaration-site and call-site markdown lookup for documented C# methods.
 
 Params:
+
 - `label`: Display label to format.
 
 Returns:
@@ -24,7 +25,7 @@ Formatted showcase text.
 
 ---
 
-## Task<string> Showcase.Services.Calculator.DescribeAsync(Guid id)
+### `Task<string> Showcase.Services.Calculator.DescribeAsync(Guid id)`
 
 Brief: Builds an asynchronous showcase description from an identifier.
 
@@ -32,6 +33,7 @@ Details:
 This method demonstrates documented async-style C# method signatures in the external markdown format.
 
 Params:
+
 - `id`: Identifier rendered into the description.
 
 Returns:
@@ -39,7 +41,7 @@ Asynchronously produced showcase text.
 
 ---
 
-## Showcase.Services.ShowcaseUsage
+### `Showcase.Services.ShowcaseUsage`
 
 Brief: Static C# showcase type that provides a stable call path for manual checks.
 
@@ -48,7 +50,7 @@ The sample keeps the file valid and gives the extension a place to resolve call-
 
 ---
 
-## Task<string> Showcase.Services.ShowcaseUsage.RunAsync()
+### `Task<string> Showcase.Services.ShowcaseUsage.RunAsync()`
 
 Brief: Executes the C# showcase flow by calling the documented calculator members.
 

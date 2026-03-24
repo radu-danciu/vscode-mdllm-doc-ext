@@ -1,6 +1,6 @@
-# src/core/pathMapper.ts
+## src/core/pathMapper.ts
 
-## mapSourceToDocs(workspaceFolder: vscode.WorkspaceFolder, sourceUri: vscode.Uri, config: ExternalDocsConfig, langBucket: string) -> PathMappingResult | null
+### `mapSourceToDocs(workspaceFolder: vscode.WorkspaceFolder, sourceUri: vscode.Uri, config: ExternalDocsConfig, langBucket: string) -> PathMappingResult | null`
 
 Brief: Maps a source file into its mirrored Markdown docs path.
 
@@ -12,7 +12,7 @@ Mirrored docs path information or null when the source is outside the configured
 
 ---
 
-## PathMappingResult
+### `PathMappingResult`
 
 Brief: Defines the repo-local type `PathMappingResult` in `src/core/pathMapper.ts`.
 

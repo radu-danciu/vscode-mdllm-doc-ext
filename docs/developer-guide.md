@@ -45,7 +45,7 @@ scripts/
 2. The registry selects a `LanguageModule` for that document.
 3. The module produces a `ResolvedSymbol` with a canonical signature.
 4. The path mapper mirrors the source file into a docs file path.
-5. The doc index parses the Markdown file and finds the matching `##` entry.
+5. The doc index parses the Markdown file and finds the matching `###` entry.
 6. If a Markdown entry exists, the provider or command renders it or opens it directly.
 7. If no Markdown entry exists, hover/definition fall back to the editor or other extensions first.
 8. Only when there is still no better result does the extension offer the create-doc affordance or source-comment fallback.
@@ -75,7 +75,8 @@ Then:
 
 All modules emit the same general Markdown shape:
 
-- `## <canonical signature>`
+- `## <source-relative-path>`
+- ``### `<canonical signature>` ``
 - `Brief`
 - `Details`
 - `Params` when relevant
@@ -98,7 +99,7 @@ All modules emit the same general Markdown shape:
 - Use `npm run release:tag` on the release commit to create `vmajor.minor.patch.git_sha`.
 - Push with `git push --follow-tags`.
 - `CI` validates the repository on pushes and pull requests.
-- `Release Build` validates the tag format, reruns tests, packages the tagged build, and uploads the VSIX back to GitHub.
+- `Release Build` validates the tag format, reruns `npm run check`, packages the tagged build, and uploads the VSIX back to GitHub.
 - `Marketplace Publish` is separate, secret-gated by `VSCE_PAT`, and publishes a packaged tagged VSIX to the VS Code Marketplace.
 - Changing `package.json.name` changes the extension identity for VS Code and Marketplace update purposes.
 - Local publish remains optional and is intentionally outside the default repository workflow.

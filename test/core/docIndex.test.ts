@@ -17,7 +17,7 @@ suite('docIndex', () => {
     const module = new JsTsLanguageModule();
     await writeRelativeFile(
       tempRelativePath,
-      '# example.ts\n\n## example(value: number) -> number\n\nBrief: One\n'
+      '## example.ts\n\n### `example(value: number) -> number`\n\nBrief: One\n'
     );
 
     const symbol = {
@@ -35,7 +35,7 @@ suite('docIndex', () => {
 
     await writeRelativeFile(
       tempRelativePath,
-      '# example.ts\n\n## example(value: number) -> number\n\nBrief: Two\n'
+      '## example.ts\n\n### `example(value: number) -> number`\n\nBrief: Two\n'
     );
 
     const cached = await index.findEntry(docsUri, symbol, module);

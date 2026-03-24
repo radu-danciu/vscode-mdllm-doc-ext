@@ -112,6 +112,9 @@
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
+    "lint:md": "markdownlint-cli2",
+    "lint": "npm run lint:md",
+    "check": "npm run lint && npm test",
     "test:unit": "node ./out/test/runUnitTests.js",
     "test:integration": "node ./out/test/integration/runTest.js",
     "test": "npm run compile && npm run test:unit && npm run test:integration",
@@ -129,6 +132,7 @@
     "@types/vscode": "^1.90.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.2",
+    "markdownlint-cli2": "^0.18.1",
     "mocha": "^11.7.4",
     "typescript": "^5.9.3"
   }

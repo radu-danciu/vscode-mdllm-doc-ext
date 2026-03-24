@@ -1,0 +1,21 @@
+{
+  "globs": [
+    "README.md",
+    "CHANGELOG.md",
+    "docs/developer-guide.md",
+    "docs/api/**/*.md",
+    "test/fixtures/**/docs/api/**/*.md"
+  ],
+  "ignores": [
+    "docs/foundation/**",
+    "docs/agent_governance/**",
+    "dist/**",
+    "node_modules/**",
+    ".vscode-test/**"
+  ],
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD041": false
+  }
+}

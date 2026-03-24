@@ -1,6 +1,6 @@
-# showcase/ts/showcase.ts
+## showcase/ts/showcase.ts
 
-## ShowcaseRenderer
+### `ShowcaseRenderer`
 
 Brief: Interface used by the TypeScript showcase to demonstrate type-level documentation lookup.
 
@@ -9,7 +9,7 @@ Hovering the interface or its method shows how mirrored markdown works for repos
 
 ---
 
-## ShowcaseRenderer.render(title: string) -> string
+### `ShowcaseRenderer.render(title: string) -> string`
 
 Brief: Contract method used by the TypeScript showcase renderer.
 
@@ -17,6 +17,7 @@ Details:
 Use this entry to verify interface-method hover and markdown navigation behavior.
 
 Params:
+
 - `title`: Display label rendered by the showcase implementation.
 
 Returns:
@@ -24,7 +25,7 @@ Formatted label text.
 
 ---
 
-## ShowcaseStatus
+### `ShowcaseStatus`
 
 Brief: Simple TypeScript type alias used to verify alias hover coverage in the showcase workspace.
 
@@ -33,7 +34,7 @@ This entry exists so the showcase demonstrates external docs for aliases as well
 
 ---
 
-## ShowcaseVector
+### `ShowcaseVector`
 
 Brief: Concrete TypeScript showcase type that implements the renderer contract.
 
@@ -41,11 +42,12 @@ Details:
 Hover the class name or its call sites to validate mirrored markdown lookup against a real repo-local TypeScript file.
 
 Inheritance:
-- ShowcaseRenderer
+
+- `ShowcaseRenderer`
 
 ---
 
-## ShowcaseVector.magnitude() -> number
+### `ShowcaseVector.magnitude() -> number`
 
 Brief: Returns the absolute vector magnitude in the TypeScript showcase.
 
@@ -57,7 +59,7 @@ Absolute numeric magnitude.
 
 ---
 
-## ShowcaseVector.render(title: string) -> string
+### `ShowcaseVector.render(title: string) -> string`
 
 Brief: Renders the TypeScript showcase label with the computed magnitude.
 
@@ -65,6 +67,7 @@ Details:
 This method demonstrates a documented class member that also satisfies an interface contract.
 
 Params:
+
 - `title`: Display label rendered by the showcase instance.
 
 Returns:
@@ -72,7 +75,7 @@ Combined label and magnitude string.
 
 ---
 
-## normalizeShowcase(value: number) -> number
+### `normalizeShowcase(value: number) -> number`
 
 Brief: Normalizes a numeric input in the TypeScript showcase file.
 
@@ -80,6 +83,7 @@ Details:
 Hover the declaration or the local call site at the bottom of the file to confirm the extension resolves the same markdown entry.
 
 Params:
+
 - `value`: Input number to normalize.
 
 Returns:

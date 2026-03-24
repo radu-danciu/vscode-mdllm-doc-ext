@@ -1,6 +1,6 @@
-# src/extension.ts
+## src/extension.ts
 
-## activate(context: vscode.ExtensionContext) -> Promise<void>
+### `activate(context: vscode.ExtensionContext) -> Promise<void>`
 
 Brief: Activates the extension and registers providers, commands, and cache invalidation hooks.
 
@@ -12,7 +12,7 @@ Activation completion.
 
 ---
 
-## deactivate() -> void
+### `deactivate() -> void`
 
 Brief: Describes the repo-local function `deactivate` in `src/extension.ts`.
 

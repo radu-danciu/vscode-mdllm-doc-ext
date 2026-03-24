@@ -1,6 +1,6 @@
-# test/integration/runTest.ts
+## test/integration/runTest.ts
 
-## main() -> Promise<void>
+### `main() -> Promise<void>`
 
 Brief: Describes the repo-local function `main` in `test/integration/runTest.ts`.
 

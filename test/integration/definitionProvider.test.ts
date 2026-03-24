@@ -44,9 +44,9 @@ suite('definition provider integration', () => {
     await writeRelativeFile(
       docsPath,
       [
-        '# src/targets.ts',
+        '## src/targets.ts',
         '',
-        '## documentedTarget(value: number) -> number',
+        '### `documentedTarget(value: number) -> number`',
         '',
         'Brief: Definition call-site documented target.',
         '',

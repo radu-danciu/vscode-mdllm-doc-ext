@@ -1,6 +1,6 @@
-# test/runUnitTests.ts
+## test/runUnitTests.ts
 
-## main() -> Promise<void>
+### `main() -> Promise<void>`
 
 Brief: Describes the repo-local function `main` in `test/runUnitTests.ts`.
 

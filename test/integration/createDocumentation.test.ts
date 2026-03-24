@@ -76,7 +76,12 @@ suite('create documentation integration', () => {
       );
       await vscode.commands.executeCommand('externalDocs.createSymbolDocumentation');
       const created = await readRelativeFile(testCase.expectedDoc);
-      assert.match(created, new RegExp(testCase.expectedSignature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      assert.match(
+        created,
+        new RegExp(
+          `### \`${testCase.expectedSignature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\``
+        )
+      );
       assert.match(created, /Brief: TODO/);
     }
   });
@@ -100,7 +105,7 @@ suite('create documentation integration', () => {
     const created = await readRelativeFile(
       'test/.tmp/create-docs/typeWorkspace/docs/api/ts/web/models/fancy_ts.md'
     );
-    assert.match(created, /## FancyVector/);
-    assert.match(created, /Inheritance:\n- BaseVector/);
+    assert.match(created, /### `FancyVector`/);
+    assert.match(created, /Inheritance:\n\n- `BaseVector`/);
   });
 });

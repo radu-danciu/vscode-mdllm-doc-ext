@@ -36,15 +36,15 @@ export function registerCreateSymbolDocumentationCommand(
 
       if (!exists) {
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(path.dirname(docsUri.fsPath)));
-        content = `# ${resolved.mapping.sourceRelativePath}\n\n${resolved.module.createStub(resolved.symbol)}`;
+        content = `## ${resolved.mapping.sourceRelativePath}\n\n${resolved.module.createStub(resolved.symbol)}`;
         await vscode.workspace.fs.writeFile(docsUri, Buffer.from(content, 'utf8'));
       } else {
         const existingEntry = await documentationService.findEntry(resolved);
         if (!existingEntry) {
           const prefix = content.trim().length > 0 ? '\n\n' : '';
-          const header = content.trim().startsWith('# ')
+          const header = /^(#|##)\s+/m.test(content.trimStart())
             ? ''
-            : `# ${resolved.mapping.sourceRelativePath}\n\n`;
+            : `## ${resolved.mapping.sourceRelativePath}\n\n`;
           content = `${header}${content.trimEnd()}${prefix}${resolved.module.createStub(resolved.symbol)}`;
           await vscode.workspace.fs.writeFile(docsUri, Buffer.from(content, 'utf8'));
         }

@@ -1,6 +1,6 @@
-# test/runMocha.ts
+## test/runMocha.ts
 
-## run() -> Promise<void>
+### `run() -> Promise<void>`
 
 Brief: Describes the repo-local function `run` in `test/runMocha.ts`.
 
@@ -12,7 +12,7 @@ Value returned by `run`.
 
 ---
 
-## collectTestFiles(directory: string) -> string[]
+### `collectTestFiles(directory: string) -> string[]`
 
 Brief: Describes the repo-local function `collectTestFiles` in `test/runMocha.ts`.
 
@@ -20,6 +20,7 @@ Details:
 This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
 
 Params:
+
 - `directory`: Input accepted by `collectTestFiles`.
 
 Returns:

@@ -1,5 +1,5 @@
 # Changelog
 
-### commit subject
+## commit subject
 
 commit message

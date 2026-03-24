@@ -30,9 +30,9 @@ Example mappings:
 ## Markdown format
 
 ```md
-# src/core/config.ts
+## src/core/config.ts
 
-## getConfig(workspaceFolder: vscode.WorkspaceFolder) -> ExternalDocsConfig
+### `getConfig(workspaceFolder: vscode.WorkspaceFolder) -> ExternalDocsConfig`
 
 Brief: Reads the extension settings for a workspace.
 
@@ -42,7 +42,7 @@ Shared config entrypoint for the extension.
 ---
 ```
 
-The first `#` heading identifies the source file. Each `##` heading is one symbol entry keyed by canonical signature.
+The first `##` heading identifies the source file. Each `###` heading is one symbol entry keyed by canonical signature.
 
 ## Commands
 
@@ -90,7 +90,7 @@ Use the cross-language examples under `showcase/` for manual checks in TypeScrip
 
 ```bash
 npm install
-npm test
+npm run check
 npm run package:vsix
 ```
 
@@ -121,12 +121,13 @@ git push --follow-tags
 
 Useful commands:
 
+- `npm run check`
 - `npm run release:info`
 - `npm run package:vsix`
 - `npm run package:release`
 - `npm run publish:release` when publishing locally on purpose
 
-GitHub release packaging and GitHub release assets live in the `Release Build` workflow.
+GitHub release packaging and GitHub release assets live in the `Release Build` workflow, which reruns `npm run check` before packaging.
 Marketplace publishing is a separate `Marketplace Publish` workflow and expects a repository secret named `VSCE_PAT`. No secret material is stored in this repository.
 Tagged releases upload the packaged `.vsix` back to GitHub as both an Actions artifact and a GitHub release asset.
 

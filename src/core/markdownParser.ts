@@ -30,14 +30,14 @@ export function parseMarkdownEntries(
   };
 
   lines.forEach((line, index) => {
-    if (index === 0 && line.startsWith('# ')) {
-      sourceRelativePath = line.slice(2).trim();
+    if (index === 0 && (line.startsWith('# ') || line.startsWith('## '))) {
+      sourceRelativePath = line.replace(/^#{1,2}\s+/, '').trim();
       return;
     }
 
-    if (line.startsWith('## ')) {
+    if (line.startsWith('## ') || line.startsWith('### ')) {
       flush(index - 1);
-      currentSignature = line.slice(3).trim();
+      currentSignature = unwrapSignatureHeading(line.replace(/^#{2,3}\s+/, '').trim());
       currentStartLine = index;
       currentBodyLines = [];
       return;
@@ -54,4 +54,12 @@ export function parseMarkdownEntries(
     sourceRelativePath,
     entries
   };
+}
+
+function unwrapSignatureHeading(value: string): string {
+  if (value.startsWith('`') && value.endsWith('`') && value.length >= 2) {
+    return value.slice(1, -1).trim();
+  }
+
+  return value;
 }
