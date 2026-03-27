@@ -5,6 +5,7 @@ import {
   configureWorkspace,
   hoverText,
   openEditor,
+  positionInSnippet,
   positionOf,
   removeRelativePath,
   writeRelativeFile
@@ -199,7 +200,7 @@ suite('hover provider integration', () => {
         token: 'normalizeShowcase',
         codeRoot: '.',
         docsRoot: 'docs/api',
-        expected: 'Normalizes a numeric input in the TypeScript showcase file'
+        expected: 'Normalizes a numeric value in the TypeScript showcase'
       }
     ];
 
@@ -234,6 +235,55 @@ suite('hover provider integration', () => {
 
     assert.match(hover, /Brief: Reads the extension settings/);
     assert.match(hover, /\n\nDetails:\nKeeps the rest of the extension code away/);
+  });
+
+  test('resolves self-hosted docs from multiline declaration positions', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+    const editor = await openEditor('src/core/definitionProvider.ts');
+    const positions = [
+      positionOf(editor.document, 'provideDefinition'),
+      positionOf(editor.document, 'TextDocument'),
+      positionOf(editor.document, 'Promise')
+    ];
+
+    for (const position of positions) {
+      const hover = await hoverText(editor, position);
+      assert.match(hover, /Brief: Describes the repo-local method `provideDefinition`/);
+      assert.match(hover, /Open full documentation/);
+    }
+  });
+
+  test('resolves self-hosted DocumentationService docs from method, param, and return-type positions', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+    const editor = await openEditor('src/core/documentationService.ts');
+    const cases = [
+      {
+        snippet: 'private async getDocumentPositionFromTarget(',
+        probes: ['getDocumentPositionFromTarget', 'CommandTarget', 'Promise'],
+        expected: /Brief: Describes the repo-local method `getDocumentPositionFromTarget`/
+      },
+      {
+        snippet: 'private async resolveCandidatesFromDefinitions(',
+        probes: ['resolveCandidatesFromDefinitions', 'TextDocument', 'Promise'],
+        expected: /Brief: Describes the repo-local method `resolveCandidatesFromDefinitions`/
+      },
+      {
+        snippet: 'private async documentPositionFromDefinition(',
+        probes: ['documentPositionFromDefinition', 'Location', 'Promise'],
+        expected: /Brief: Describes the repo-local method `documentPositionFromDefinition`/
+      }
+    ];
+
+    for (const testCase of cases) {
+      for (const probe of testCase.probes) {
+        const hover = await hoverText(
+          editor,
+          positionInSnippet(editor.document, testCase.snippet, probe)
+        );
+        assert.match(hover, testCase.expected);
+        assert.match(hover, /Open full documentation/);
+      }
+    }
   });
 
   test('does not block another hover provider when external docs are missing', async () => {

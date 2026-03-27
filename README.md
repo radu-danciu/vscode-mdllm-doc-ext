@@ -18,6 +18,7 @@ Language support:
 
 - Shows hover documentation from mirrored Markdown files.
 - Sends `Go to Definition` / Ctrl+Click to the matching Markdown entry.
+- Extends source-driven F2 rename so mirrored Markdown headings and backticked code references move with the source symbol.
 - Falls back to built-in or other extension hovers and definitions when no mirrored Markdown entry exists.
 - Offers `Create Symbol Documentation` only when no mirrored doc entry and no better hover result exist.
 - Mirrors source files into `docs/api/<language-bucket>/...`.
@@ -74,6 +75,7 @@ The first `##` heading identifies the source file. Each `###` heading is one sym
 3. Hover a supported symbol with an existing Markdown entry.
 4. Hover a supported symbol with only source comments to see the source-comment fallback.
 5. Use `Create Symbol Documentation` on a supported symbol that has neither mirrored docs nor a better built-in hover.
+6. Rename a documented symbol with F2 to update the source plus mirrored Markdown code references together.
 
 ## Dogfooding this repo
 

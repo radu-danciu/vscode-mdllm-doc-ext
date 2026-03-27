@@ -10,6 +10,7 @@ Keep the extension boring, deterministic, and easy to extend.
 - Mirrored file paths make docs easy for both humans and tools to locate.
 - Heuristic string matching is preferred over heavy semantic tooling.
 - The extension should not steal hovers or definitions when the editor already has a better answer.
+- Source-driven rename should preserve the editor's normal rename semantics and only append conservative Markdown edits.
 - The repository should remain fully dogfooded: the extension code, helper scripts, tests, and showcase samples all live beside mirrored docs.
 
 ## Repository layout
@@ -41,14 +42,15 @@ scripts/
 
 ## Core flow
 
-1. A hover, definition request, or command resolves the active document and cursor position.
+1. A hover, definition request, rename request, or command resolves the active document and cursor position.
 2. The registry selects a `LanguageModule` for that document.
 3. The module produces a `ResolvedSymbol` with a canonical signature.
 4. The path mapper mirrors the source file into a docs file path.
 5. The doc index parses the Markdown file and finds the matching `###` entry.
 6. If a Markdown entry exists, the provider or command renders it or opens it directly.
 7. If no Markdown entry exists, hover/definition fall back to the editor or other extensions first.
-8. Only when there is still no better result does the extension offer the create-doc affordance or source-comment fallback.
+8. Source-driven rename delegates the real source edit to the editor or language tooling and only appends mirrored Markdown edits afterward.
+9. Only when there is still no better result does the extension offer the create-doc affordance or source-comment fallback.
 
 ## Adding another language
 

@@ -115,6 +115,8 @@
     "lint:md": "markdownlint-cli2",
     "lint": "npm run lint:md",
     "check": "npm run lint && npm test",
+    "test:audit": "npm run compile && node ./out/test/runAudit.js",
+    "audit:runtime-docs": "npm run compile && node ./out/test/runAudit.js --report",
     "test:unit": "node ./out/test/runUnitTests.js",
     "test:integration": "node ./out/test/integration/runTest.js",
     "test": "npm run compile && npm run test:unit && npm run test:integration",

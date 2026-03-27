@@ -2,6 +2,13 @@ import * as vscode from 'vscode';
 import { parseMarkdownEntries } from './markdownParser';
 import { DocEntry, LanguageModule, ParsedDocFile, ResolvedSymbol } from './types';
 
+export type DocIndexMatchType = 'exact' | 'normalized' | 'fallback' | 'none';
+
+export interface DocIndexMatchResult {
+  entry: DocEntry | null;
+  matchType: DocIndexMatchType;
+}
+
 export class DocIndex {
   private readonly cache = new Map<string, ParsedDocFile | null>();
 
@@ -38,16 +45,24 @@ export class DocIndex {
     symbol: ResolvedSymbol,
     module: LanguageModule
   ): Promise<DocEntry | null> {
+    return (await this.findEntryDetailed(uri, symbol, module)).entry;
+  }
+
+  public async findEntryDetailed(
+    uri: vscode.Uri,
+    symbol: ResolvedSymbol,
+    module: LanguageModule
+  ): Promise<DocIndexMatchResult> {
     const parsed = await this.getParsedDoc(uri, module.normalizeSignature.bind(module));
     if (!parsed) {
-      return null;
+      return { entry: null, matchType: 'none' };
     }
 
     const exact = parsed.entries.find(
       (entry) => entry.signature === symbol.canonicalSignature
     );
     if (exact) {
-      return exact;
+      return { entry: exact, matchType: 'exact' };
     }
 
     const normalizedTarget = module.normalizeSignature(symbol.canonicalSignature);
@@ -55,16 +70,16 @@ export class DocIndex {
       (entry) => entry.normalizedSignature === normalizedTarget
     );
     if (normalized) {
-      return normalized;
+      return { entry: normalized, matchType: 'normalized' };
     }
 
     if (module.matchesEntry) {
       const fallback = parsed.entries.find((entry) => module.matchesEntry?.(symbol, entry));
       if (fallback) {
-        return fallback;
+        return { entry: fallback, matchType: 'fallback' };
       }
     }
 
-    return null;
+    return { entry: null, matchType: 'none' };
   }
 }

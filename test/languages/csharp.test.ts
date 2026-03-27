@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { CSharpLanguageModule } from '../../src/languages/csharp/module';
-import { getWorkspaceFolder, openEditor, positionOf } from '../helpers';
+import { getWorkspaceFolder, openEditor, positionOf, removeRelativePath, writeRelativeFile } from '../helpers';
 
 suite('csharp language module', () => {
   const module = new CSharpLanguageModule();
@@ -57,5 +57,55 @@ suite('csharp language module', () => {
 
     assert.match(stub, /Box<string>/);
     assert.match(stub, /T1 = string/);
+  });
+
+  teardown(async () => {
+    await removeRelativePath('test/.tmp/csharp-language');
+  });
+
+  test('resolves multiline method declaration positions to the same signature', async () => {
+    const relativePath = 'test/.tmp/csharp-language/src/Foo/Multiline.cs';
+    await writeRelativeFile(
+      relativePath,
+      [
+        'namespace Project.Services {',
+        '  public class UserService {',
+        '    public async Task<string> GetNameAsync(',
+        '      Guid id,',
+        '      CancellationToken token',
+        '    ) {',
+        '      return id.ToString();',
+        '    }',
+        '  }',
+        '}'
+      ].join('\n')
+    );
+
+    const editor = await openEditor(relativePath);
+    const workspaceFolder = getWorkspaceFolder();
+    const tempConfig = {
+      ...config,
+      codeRoot: 'test/.tmp/csharp-language',
+      docsRoot: 'test/.tmp/csharp-language/docs/api'
+    };
+
+    const positions = [
+      positionOf(editor.document, 'GetNameAsync'),
+      positionOf(editor.document, 'Guid'),
+      positionOf(editor.document, 'Task')
+    ];
+
+    for (const position of positions) {
+      const symbol = await module.resolveSymbol({
+        document: editor.document,
+        position,
+        workspaceFolder,
+        config: tempConfig
+      });
+      assert.strictEqual(
+        symbol?.canonicalSignature,
+        'Task<string> Project.Services.UserService.GetNameAsync(Guid id, CancellationToken token)'
+      );
+    }
   });
 });

@@ -1,11 +1,17 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExternalDocsConfig, LanguageModule, ResolvedSymbol, SymbolContext } from '../../core/types';
+import {
+  ExternalDocsConfig,
+  LanguageModule,
+  ResolvedSymbol,
+  SymbolContext,
+  SymbolEnumerationContext
+} from '../../core/types';
 import { normalizeWhitespace, sourceRelativePathForDocument } from '../../core/utils';
 import {
-  getWordRange,
+  declarationLineRange,
   ParsedSymbolCandidate,
-  rangeContains,
+  selectBestCandidate,
   signatureArity,
   signatureName,
   splitParams,
@@ -26,37 +32,21 @@ export class PythonLanguageModule implements LanguageModule {
   }
 
   public async resolveSymbol(context: SymbolContext): Promise<ResolvedSymbol | null> {
-    const wordRange = getWordRange(context.document, context.position);
-    if (!wordRange) {
-      return null;
-    }
-
-    const candidate = parsePythonDocument(context.document, context).find((entry) =>
-      rangeContains(entry.range, context.position)
+    const candidate = selectBestCandidate(
+      parsePythonDocument(context.document, context),
+      context.position
     );
     if (!candidate) {
       return null;
     }
 
-    return {
-      kind: candidate.kind,
-      displayName: candidate.name,
-      canonicalSignature: candidate.signature,
-      sourceFile: context.document.uri,
-      sourceRelativePath: sourceRelativePathForDocument(
-        context.workspaceFolder,
-        context.document,
-        context.config
-      ),
-      symbolRange: wordRange,
-      containerName: candidate.container,
-      params: candidate.params,
-      returnType: candidate.returnType,
-      inheritanceChain: candidate.inheritanceChain,
-      frozenTypeArguments: candidate.frozenTypeArguments,
-      lookupName: signatureName(candidate.signature),
-      arity: signatureArity(candidate.signature)
-    };
+    return toResolvedSymbol(context, candidate);
+  }
+
+  public async listSymbols(context: SymbolEnumerationContext): Promise<ResolvedSymbol[]> {
+    return parsePythonDocument(context.document, context).map((candidate) =>
+      toResolvedSymbol(context, candidate)
+    );
   }
 
   public createStub(symbol: ResolvedSymbol): string {
@@ -80,7 +70,7 @@ export class PythonLanguageModule implements LanguageModule {
 
 function parsePythonDocument(
   document: vscode.TextDocument,
-  context: SymbolContext
+  context: SymbolEnumerationContext
 ): ParsedSymbolCandidate[] {
   const lines = document.getText().split(/\r?\n/);
   const candidates: ParsedSymbolCandidate[] = [];
@@ -117,6 +107,7 @@ function parsePythonDocument(
         kind: 'type',
         signature: fullName,
         range: new vscode.Range(lineIndex, start, lineIndex, start + name.length),
+        declarationRange: declarationLineRange(document, lineIndex),
         inheritanceChain: inheritance,
         frozenTypeArguments: extractTemplateValues(inheritance[0])
       });
@@ -148,6 +139,7 @@ function parsePythonDocument(
         signature,
         container: containerPath || modulePath,
         range: new vscode.Range(lineIndex, start, lineIndex, start + name.length),
+        declarationRange: declarationLineRange(document, lineIndex),
         params,
         returnType
       });
@@ -171,4 +163,30 @@ function extractTemplateValues(value?: string): Array<{ name: string; value: str
     name: `T${index + 1}`,
     value: entry.trim()
   }));
+}
+
+function toResolvedSymbol(
+  context: SymbolEnumerationContext,
+  candidate: ParsedSymbolCandidate
+): ResolvedSymbol {
+  return {
+    kind: candidate.kind,
+    displayName: candidate.name,
+    canonicalSignature: candidate.signature,
+    sourceFile: context.document.uri,
+    sourceRelativePath: sourceRelativePathForDocument(
+      context.workspaceFolder,
+      context.document,
+      context.config
+    ),
+    symbolRange: candidate.range,
+    declarationRange: candidate.declarationRange ?? candidate.range,
+    containerName: candidate.container,
+    params: candidate.params,
+    returnType: candidate.returnType,
+    inheritanceChain: candidate.inheritanceChain,
+    frozenTypeArguments: candidate.frozenTypeArguments,
+    lookupName: signatureName(candidate.signature),
+    arity: signatureArity(candidate.signature)
+  };
 }

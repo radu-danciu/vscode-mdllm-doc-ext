@@ -10,6 +10,7 @@ import { CppLanguageModule, CSharpLanguageModule, JsTsLanguageModule, PythonLang
 import {
   configureWorkspace,
   openEditor,
+  positionInSnippet,
   positionOf,
   removeRelativePath,
   writeRelativeFile
@@ -236,5 +237,45 @@ suite('documentationService', () => {
         (candidate: ResolvedDocumentationCandidate) => candidate.source === 'definition'
       )
     );
+  });
+
+  test('resolves self-hosted private multiline methods from declaration positions', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+    const editor = await openEditor('src/core/documentationService.ts');
+    const cases = [
+      {
+        snippet: 'private async getDocumentPositionFromTarget(',
+        expected:
+          'DocumentationService.getDocumentPositionFromTarget(target?: CommandTarget) -> Promise<DocumentPosition | null>',
+        probes: ['getDocumentPositionFromTarget', 'CommandTarget', 'Promise']
+      },
+      {
+        snippet: 'private async resolveCandidatesFromDefinitions(',
+        expected:
+          'DocumentationService.resolveCandidatesFromDefinitions(document: vscode.TextDocument, position: vscode.Position, maxCandidates: number) -> Promise<ResolvedDocumentationCandidate[]>',
+        probes: ['resolveCandidatesFromDefinitions', 'TextDocument', 'Promise']
+      },
+      {
+        snippet: 'private async documentPositionFromDefinition(',
+        expected:
+          'DocumentationService.documentPositionFromDefinition(definition: vscode.Location | vscode.LocationLink) -> Promise<DocumentPosition | null>',
+        probes: ['documentPositionFromDefinition', 'Location', 'Promise']
+      }
+    ];
+
+    for (const testCase of cases) {
+      for (const probe of testCase.probes) {
+        const candidates = await service.resolveDocumentationCandidates(
+          editor.document,
+          positionInSnippet(editor.document, testCase.snippet, probe),
+          3
+        );
+
+        assert.ok(candidates.length >= 1);
+        assert.strictEqual(candidates[0].source, 'direct');
+        assert.strictEqual(candidates[0].target.symbol.canonicalSignature, testCase.expected);
+        assert.strictEqual(candidates[0].entry?.signature, testCase.expected);
+      }
+    }
   });
 });

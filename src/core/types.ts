@@ -33,6 +33,7 @@ export interface ResolvedSymbol {
   sourceFile: vscode.Uri;
   sourceRelativePath: string;
   symbolRange: vscode.Range;
+  declarationRange?: vscode.Range;
   containerName?: string;
   params?: SymbolParam[];
   returnType?: string;
@@ -45,6 +46,12 @@ export interface ResolvedSymbol {
 export interface SymbolContext {
   document: vscode.TextDocument;
   position: vscode.Position;
+  workspaceFolder: vscode.WorkspaceFolder;
+  config: ExternalDocsConfig;
+}
+
+export interface SymbolEnumerationContext {
+  document: vscode.TextDocument;
   workspaceFolder: vscode.WorkspaceFolder;
   config: ExternalDocsConfig;
 }
@@ -68,6 +75,7 @@ export interface LanguageModule {
   canHandle(document: vscode.TextDocument): boolean;
   getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig): string;
   resolveSymbol(context: SymbolContext): Promise<ResolvedSymbol | null>;
+  listSymbols(context: SymbolEnumerationContext): Promise<ResolvedSymbol[]>;
   createStub(symbol: ResolvedSymbol): string;
   normalizeSignature(signature: string): string;
   matchesEntry?(symbol: ResolvedSymbol, entry: DocEntry): boolean;

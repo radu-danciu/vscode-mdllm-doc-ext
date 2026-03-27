@@ -2,160 +2,100 @@
 
 ### `CppLanguageModule`
 
-Brief: Resolves C and C++ declarations into canonical signatures used by the mirrored docs index.
+Brief: C and C++ resolver backed by deterministic text parsing.
 
 Details:
-The module tracks namespaces, classes, methods, and template-derived metadata using lightweight text parsing instead of a full language server dependency.
-
-Inheritance:
-
-- `LanguageModule`
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CppLanguageModule.canHandle(document: vscode.TextDocument) -> boolean`
 
-Brief: Reports whether the module should parse the current document.
+Brief: Reports whether the module handles the current document.
 
 Details:
-The check accepts the extension's configured `c` and `cpp` language identifiers so both C and C++ files flow through the same resolver.
-
-Params:
-
-- `document`: Text document being evaluated.
-
-Returns:
-True when the document language ID is supported by this module.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `CppLanguageModule.getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
+### `CppLanguageModule.getLangBucket(_document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
 
-Brief: Returns the configured docs bucket for C and C++ sources.
+Brief: Returns the configured C++ docs bucket.
 
 Details:
-Unlike the JavaScript and TypeScript module, this resolver always maps into the single C++ docs bucket from workspace configuration.
-
-Params:
-
-- `document`: Text document being resolved.
-- `config`: Normalized external docs configuration.
-
-Returns:
-C++ docs bucket name from the workspace settings.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CppLanguageModule.resolveSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
 
-Brief: Resolves the symbol at the current cursor position from a C or C++ document.
+Brief: Resolves a C or C++ symbol at the current position.
 
 Details:
-The method combines word-range lookup, candidate parsing, range matching, and canonical metadata assembly into the `ResolvedSymbol` shape consumed by the rest of the extension.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `context`: Resolution context including document, workspace, and config data.
+### `CppLanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
-Returns:
-Resolved symbol metadata when a matching declaration is found, otherwise null.
+Brief: Enumerates C and C++ symbols in a file.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CppLanguageModule.createStub(symbol: ResolvedSymbol) -> string`
 
-Brief: Generates the default Markdown stub for a resolved C or C++ symbol.
+Brief: Builds a mirrored docs stub for a C or C++ symbol.
 
 Details:
-The implementation delegates to the shared stub builder so all language modules emit the same section structure.
-
-Params:
-
-- `symbol`: Resolved symbol to document.
-
-Returns:
-Template Markdown for a new mirrored docs entry.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CppLanguageModule.normalizeSignature(signature: string) -> string`
 
-Brief: Normalizes C++ signature spacing before docs matching.
+Brief: Normalizes C++ signature spacing for lookup.
 
 Details:
-The method compresses whitespace while preserving common C++ punctuation rules around namespace separators, commas, and template brackets.
-
-Params:
-
-- `signature`: Raw signature text.
-
-Returns:
-Normalized signature string suitable for index comparison.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CppLanguageModule.matchesEntry(symbol: ResolvedSymbol, entry: { signature: string }) -> boolean`
 
-Brief: Matches a resolved symbol against a parsed docs entry by name and arity.
+Brief: Fallback entry matcher for C++ docs.
 
 Details:
-The comparison intentionally ignores other formatting differences so equivalent callable signatures can still bind to the correct Markdown section.
-
-Params:
-
-- `symbol`: Resolved source symbol.
-- `entry`: Parsed Markdown entry candidate.
-
-Returns:
-True when the entry matches the symbol's normalized name and parameter count.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `parseCppDocument(document: vscode.TextDocument) -> ParsedSymbolCandidate[]`
 
-Brief: Parses a C or C++ document into candidate declarations.
+Brief: Parses a C or C++ source file into candidate declarations.
 
 Details:
-The parser tracks namespace and class nesting, recognizes free functions and methods, and captures inheritance and template details needed for later symbol resolution.
-
-Params:
-
-- `document`: Source document to scan.
-
-Returns:
-Parsed symbol candidates in source order.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `renderCppParams(params: Array<{ name: string; type?: string }>) -> string`
 
-Brief: Renders normalized parameter metadata back into C++-style parameter text.
+Brief: Renders normalized C++ parameter metadata.
 
 Details:
-This helper preserves the `type name` ordering used by the C++ signature formatter when assembling canonical method and function signatures.
-
-Params:
-
-- `params`: Normalized parameter descriptors.
-
-Returns:
-Comma-separated C++ parameter list text.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `extractTemplateValues(value?: string) -> Array<{ name: string; value: string }> | undefined`
 
-Brief: Extracts concrete template argument values from a type reference.
+Brief: Extracts template argument values from a C++ type string.
 
 Details:
-When inheritance mentions a templated base type, this helper turns the inner argument list into numbered placeholder names used by the docs stub generator.
-
-Params:
-
-- `value`: Type text that may include template arguments.
-
-Returns:
-Template argument mappings, or undefined when no template argument list is present.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
@@ -164,14 +104,7 @@ Template argument mappings, or undefined when no template argument list is prese
 Brief: Counts opening braces in a source line.
 
 Details:
-The parser uses brace counts to maintain namespace and class nesting without building a full syntax tree.
-
-Params:
-
-- `value`: Source line text.
-
-Returns:
-Number of `{` characters in the input.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
@@ -180,46 +113,15 @@ Number of `{` characters in the input.
 Brief: Counts closing braces in a source line.
 
 Details:
-Together with `countOpenBraces`, this helper drives the lightweight block-depth bookkeeping used during C++ parsing.
-
-Params:
-
-- `value`: Source line text.
-
-Returns:
-Number of `}` characters in the input.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `CppLanguageModule.getLangBucket(_document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
+### `toResolvedSymbol(context: SymbolEnumerationContext, candidate: ParsedSymbolCandidate) -> ResolvedSymbol`
 
-Brief: Describes the repo-local method `getLangBucket` on `CppLanguageModule` in `src/languages/cpp/module.ts`.
-
-Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `_document`: Input accepted by `getLangBucket`.
-- `config`: Input accepted by `getLangBucket`.
-
-Returns:
-Value returned by `getLangBucket`.
-
----
-
-### `extractTemplateValues(value: string) -> Array<{ name: string; value: string }> | undefined`
-
-Brief: Describes the repo-local function `extractTemplateValues` in `src/languages/cpp/module.ts`.
+Brief: Promotes a parsed C++ candidate into a resolved symbol.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `value`: Input accepted by `extractTemplateValues`.
-
-Returns:
-Value returned by `extractTemplateValues`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---

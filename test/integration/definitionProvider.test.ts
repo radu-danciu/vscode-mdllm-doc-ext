@@ -5,6 +5,7 @@ import {
   configureWorkspace,
   definitionsAt,
   openEditor,
+  positionInSnippet,
   positionOf,
   relativeFsPath,
   removeRelativePath,
@@ -160,5 +161,51 @@ suite('definition provider integration', () => {
     const definitions = await definitionsAt(editor, positionOf(editor.document, 'documentedTarget'));
 
     assert.ok(definitions.some((definition) => relativeFsPath(definition.uri) === `${tempRoot}/docs/api/ts/src/targets_ts.md`));
+  });
+
+  test('routes multiline self-hosted declaration positions to markdown docs', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+    const editor = await openEditor('src/core/definitionProvider.ts');
+    const expectedDoc = 'docs/api/ts/src/core/definitionProvider_ts.md';
+    const positions = [
+      positionOf(editor.document, 'provideDefinition'),
+      positionOf(editor.document, 'TextDocument'),
+      positionOf(editor.document, 'Promise')
+    ];
+
+    for (const position of positions) {
+      const definitions = await definitionsAt(editor, position);
+      assert.ok(definitions.some((definition) => relativeFsPath(definition.uri) === expectedDoc));
+    }
+  });
+
+  test('routes DocumentationService declaration positions to their markdown entries', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+    const editor = await openEditor('src/core/documentationService.ts');
+    const expectedDoc = 'docs/api/ts/src/core/documentationService_ts.md';
+    const cases = [
+      {
+        snippet: 'private async getDocumentPositionFromTarget(',
+        probes: ['getDocumentPositionFromTarget', 'CommandTarget', 'Promise']
+      },
+      {
+        snippet: 'private async resolveCandidatesFromDefinitions(',
+        probes: ['resolveCandidatesFromDefinitions', 'TextDocument', 'Promise']
+      },
+      {
+        snippet: 'private async documentPositionFromDefinition(',
+        probes: ['documentPositionFromDefinition', 'Location', 'Promise']
+      }
+    ];
+
+    for (const testCase of cases) {
+      for (const probe of testCase.probes) {
+        const definitions = await definitionsAt(
+          editor,
+          positionInSnippet(editor.document, testCase.snippet, probe)
+        );
+        assert.ok(definitions.some((definition) => relativeFsPath(definition.uri) === expectedDoc));
+      }
+    }
   });
 });

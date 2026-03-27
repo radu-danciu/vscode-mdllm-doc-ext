@@ -2,197 +2,270 @@
 
 ### `JsTsLanguageModule`
 
-Brief: Resolves JavaScript and TypeScript symbols into canonical signatures used by the external docs index.
+Brief: JavaScript and TypeScript resolver backed by the TypeScript AST.
 
 Details:
-The module handles function declarations, class declarations, class methods, and object-like containers using deterministic text parsing.
-
-Inheritance:
-
-- `LanguageModule`
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.canHandle(document: vscode.TextDocument) -> boolean`
 
-Brief: Reports whether the module should parse the current document as JavaScript or TypeScript.
+Brief: Reports whether the module handles the current document.
 
 Details:
-The check delegates to the module's supported language ID list so the resolver treats JS, JSX, TS, and TSX consistently.
-
-Params:
-
-- `document`: Text document being evaluated.
-
-Returns:
-True when the document language ID is one of the supported JavaScript or TypeScript variants.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
 
-Brief: Returns the configured docs bucket for the current JavaScript or TypeScript document.
+Brief: Returns the configured JS or TS docs bucket.
 
 Details:
-The method chooses between the JavaScript and TypeScript bucket names based on the document language ID prefix.
-
-Params:
-
-- `document`: Text document being resolved.
-- `config`: Normalized external docs configuration.
-
-Returns:
-Configured JavaScript or TypeScript docs bucket name.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.resolveSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
 
-Brief: Resolves the symbol at the current cursor position from a JavaScript or TypeScript document.
+Brief: Resolves a JavaScript or TypeScript symbol at the current position.
 
 Details:
-The method finds the hovered word range, parses candidate declarations from the file, and returns canonical symbol metadata for later docs lookup.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `context`: Resolution context including document, workspace, and config data.
+### `JsTsLanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
-Returns:
-Resolved symbol metadata when a matching declaration is found, otherwise null.
+Brief: Enumerates JavaScript and TypeScript symbols in a file.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.createStub(symbol: ResolvedSymbol) -> string`
 
-Brief: Generates the default Markdown stub for a resolved JavaScript or TypeScript symbol.
+Brief: Builds a mirrored docs stub for a JavaScript or TypeScript symbol.
 
 Details:
-The implementation delegates to the shared stub generator so manually authored docs start from a consistent template.
-
-Params:
-
-- `symbol`: Resolved symbol to document.
-
-Returns:
-Template Markdown for a new mirrored docs entry.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.normalizeSignature(signature: string) -> string`
 
-Brief: Normalizes JavaScript and TypeScript signature spacing before docs matching.
+Brief: Normalizes JavaScript and TypeScript signatures for lookup.
 
 Details:
-The method keeps dotted member paths and arrow return markers in a stable format so resolved signatures line up with parsed Markdown entries.
-
-Params:
-
-- `signature`: Raw signature text.
-
-Returns:
-Normalized signature string suitable for index comparison.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `JsTsLanguageModule.matchesEntry(symbol: ResolvedSymbol, entry: { signature: string }) -> boolean`
 
-Brief: Matches a resolved JavaScript or TypeScript symbol against a parsed docs entry by name and arity.
+Brief: Fallback entry matcher for JS and TS docs.
 
 Details:
-The comparison intentionally focuses on lookup name and parameter count so equivalent signatures still match when formatting differs slightly.
-
-Params:
-
-- `symbol`: Resolved source symbol.
-- `entry`: Parsed Markdown entry candidate.
-
-Returns:
-True when the entry matches the symbol's normalized name and parameter count.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `parseJsTsDocument(document: vscode.TextDocument) -> ParsedSymbolCandidate[]`
 
-Brief: Parses a JavaScript or TypeScript document into candidate declarations.
+Brief: Parses a JavaScript or TypeScript source file into candidate declarations.
 
 Details:
-The parser tracks classes, object literals, top-level functions, and methods so the resolver can map cursor positions back to canonical symbol signatures.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `document`: Source document to scan.
+### `collectStatementCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, statement: ts.Statement, candidates: ParsedSymbolCandidate[]) -> void`
 
-Returns:
-Parsed symbol candidates in source order.
+Brief: Collects candidates from a top-level source statement.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `collectVariableCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, declaration: ts.VariableDeclaration, candidates: ParsedSymbolCandidate[]) -> void`
+
+Brief: Collects candidates from an object-like variable declaration.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `collectClassMemberCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, className: string, member: ts.ClassElement, candidates: ParsedSymbolCandidate[]) -> void`
+
+Brief: Collects candidates from a class member declaration.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `collectInterfaceMemberCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, interfaceName: string, member: ts.TypeElement, candidates: ParsedSymbolCandidate[]) -> void`
+
+Brief: Collects candidates from an interface member declaration.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `createCallableCandidate(document: vscode.TextDocument, sourceFile: ts.SourceFile, nameNode: ts.DeclarationName, node: | ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature | ts.FunctionExpression | ts.ArrowFunction | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration, container: string | undefined, kind: ParsedSymbolCandidate['kind']) -> ParsedSymbolCandidate`
+
+Brief: Builds a parsed callable candidate from an AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `createTypeCandidate(document: vscode.TextDocument, sourceFile: ts.SourceFile, nameNode: ts.Identifier, signature: string, inheritanceChain?: string[]) -> ParsedSymbolCandidate`
+
+Brief: Builds a parsed type candidate from an AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `createObjectCandidate(document: vscode.TextDocument, sourceFile: ts.SourceFile, nameNode: ts.Identifier) -> ParsedSymbolCandidate`
+
+Brief: Builds a parsed object candidate from an AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `rangeForNode(document: vscode.TextDocument, node: ts.Node) -> vscode.Range`
+
+Brief: Converts an AST node span into a VS Code range.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `declarationRangeForNode(document: vscode.TextDocument, sourceFile: ts.SourceFile, node: | ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature | ts.FunctionExpression | ts.ArrowFunction | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration) -> vscode.Range`
+
+Brief: Builds the signature-only declaration range for a callable AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `declarationRangeUntilToken(document: vscode.TextDocument, sourceFile: ts.SourceFile, node: ts.Node, tokens: string[]) -> vscode.Range`
+
+Brief: Builds a declaration range that stops before specific tokens.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `renderCallableName(nameNode: ts.DeclarationName, node: | ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature | ts.FunctionExpression | ts.ArrowFunction | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration) -> string`
+
+Brief: Renders a callable name, including generic parameters when present.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `renderTypeName(name: string, typeParameters?: ts.NodeArray<ts.TypeParameterDeclaration>) -> string`
+
+Brief: Renders a type name with generic parameters when present.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `renderParameterName(name: ts.BindingName, questionToken?: ts.QuestionToken) -> string`
+
+Brief: Renders a parameter name, preserving optional markers.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `renderReturnType(node: | ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature | ts.FunctionExpression | ts.ArrowFunction | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration, sourceFile: ts.SourceFile) -> string | undefined`
+
+Brief: Renders a normalized callable return type from an AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `collectHeritage(heritageClauses?: ts.NodeArray<ts.HeritageClause>) -> string[] | undefined`
+
+Brief: Collects normalized heritage clause entries from a type declaration.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `buildCallableSignature(name: string, container: string | undefined, params: Array<{ name: string; type?: string }>, returnType?: string) -> string`
 
-Brief: Builds the canonical callable signature string for a parsed function or method.
+Brief: Builds the canonical callable signature for a JS or TS symbol.
 
 Details:
-This helper is shared by top-level functions and container members so both forms render parameters and optional return types consistently.
-
-Params:
-
-- `name`: Unqualified callable name.
-- `container`: Optional containing class or object name.
-- `params`: Normalized parameter descriptors.
-- `returnType`: Optional rendered return type.
-
-Returns:
-Canonical callable signature text.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `countOpenBraces(value: string) -> number`
+### `declarationNameText(name: ts.DeclarationName) -> string`
 
-Brief: Counts opening braces in a source line.
+Brief: Renders a declaration name into canonical text.
 
 Details:
-The parser uses brace counts to maintain class and object nesting while scanning the document line by line.
-
-Params:
-
-- `value`: Source line text.
-
-Returns:
-Number of `{` characters in the input.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `countCloseBraces(value: string) -> number`
+### `isNamedDeclarationName(name: ts.DeclarationName) -> name is ts.Identifier | ts.StringLiteral | ts.NumericLiteral | ts.PrivateIdentifier`
 
-Brief: Counts closing braces in a source line.
+Brief: Narrows AST declaration names to the supported named forms.
 
 Details:
-Together with `countOpenBraces`, this helper supports the lightweight block-depth bookkeeping used during JavaScript and TypeScript parsing.
-
-Params:
-
-- `value`: Source line text.
-
-Returns:
-Number of `}` characters in the input.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `buildCallableSignature(name: string, container: string | undefined, params: Array<{ name: string; type?: string }>, returnType: string) -> string`
+### `toResolvedSymbol(context: SymbolEnumerationContext, candidate: ParsedSymbolCandidate) -> ResolvedSymbol`
 
-Brief: Describes the repo-local function `buildCallableSignature` in `src/languages/jsTs/module.ts`.
+Brief: Promotes a parsed JS or TS candidate into a resolved symbol.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `name`: Input accepted by `buildCallableSignature`.
-- `container`: Input accepted by `buildCallableSignature`.
-- `params`: Input accepted by `buildCallableSignature`.
-- `returnType`: Input accepted by `buildCallableSignature`.
+### `scriptKindFor(languageId: string) -> ts.ScriptKind`
 
-Returns:
-Value returned by `buildCallableSignature`.
+Brief: Maps a VS Code language id to a TypeScript script kind.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `stripGenericSuffix(value: string) -> string`
+
+Brief: Removes the trailing generic suffix from a symbol name for fallback matching.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---

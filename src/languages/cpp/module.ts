@@ -1,16 +1,24 @@
 import * as vscode from 'vscode';
-import { ExternalDocsConfig, LanguageModule, ResolvedSymbol, SymbolContext } from '../../core/types';
+import {
+  ExternalDocsConfig,
+  LanguageModule,
+  ResolvedSymbol,
+  SymbolContext,
+  SymbolEnumerationContext
+} from '../../core/types';
 import { normalizeWhitespace, sourceRelativePathForDocument } from '../../core/utils';
 import {
-  getWordRange,
+  declarationLineRange,
   ParsedSymbolCandidate,
-  rangeContains,
+  selectBestCandidate,
   signatureArity,
   signatureName,
   splitParams,
   splitTopLevel
 } from '../common';
 import { createDefaultStub } from '../stub';
+
+const NON_DECLARATION_KEYWORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'return']);
 
 export class CppLanguageModule implements LanguageModule {
   public readonly id = 'cpp';
@@ -25,37 +33,16 @@ export class CppLanguageModule implements LanguageModule {
   }
 
   public async resolveSymbol(context: SymbolContext): Promise<ResolvedSymbol | null> {
-    const wordRange = getWordRange(context.document, context.position);
-    if (!wordRange) {
-      return null;
-    }
-
-    const candidate = parseCppDocument(context.document).find((entry) =>
-      rangeContains(entry.range, context.position)
-    );
+    const candidate = selectBestCandidate(parseCppDocument(context.document), context.position);
     if (!candidate) {
       return null;
     }
 
-    return {
-      kind: candidate.kind,
-      displayName: candidate.name,
-      canonicalSignature: candidate.signature,
-      sourceFile: context.document.uri,
-      sourceRelativePath: sourceRelativePathForDocument(
-        context.workspaceFolder,
-        context.document,
-        context.config
-      ),
-      symbolRange: wordRange,
-      containerName: candidate.container,
-      params: candidate.params,
-      returnType: candidate.returnType,
-      inheritanceChain: candidate.inheritanceChain,
-      frozenTypeArguments: candidate.frozenTypeArguments,
-      lookupName: signatureName(candidate.signature),
-      arity: signatureArity(candidate.signature)
-    };
+    return toResolvedSymbol(context, candidate);
+  }
+
+  public async listSymbols(context: SymbolEnumerationContext): Promise<ResolvedSymbol[]> {
+    return parseCppDocument(context.document).map((candidate) => toResolvedSymbol(context, candidate));
   }
 
   public createStub(symbol: ResolvedSymbol): string {
@@ -109,6 +96,7 @@ function parseCppDocument(document: vscode.TextDocument): ParsedSymbolCandidate[
         kind: 'type',
         signature: fullName,
         range: new vscode.Range(lineIndex, start, lineIndex, start + name.length),
+        declarationRange: declarationLineRange(document, lineIndex),
         inheritanceChain: inheritance,
         frozenTypeArguments: extractTemplateValues(inheritance[0])
       });
@@ -122,7 +110,13 @@ function parseCppDocument(document: vscode.TextDocument): ParsedSymbolCandidate[
       const returnType = normalizeWhitespace(outOfClassMethodMatch[1]);
       const container = outOfClassMethodMatch[2].replace(/::$/, '');
       const name = outOfClassMethodMatch[3];
+      if (NON_DECLARATION_KEYWORDS.has(name)) {
+        return;
+      }
       const params = splitParams(outOfClassMethodMatch[4]);
+      if (params.some((param) => !param.type)) {
+        return;
+      }
       const constSuffix = outOfClassMethodMatch[5] ? ' const' : '';
       const signature = `${returnType} ${container}::${name}(${renderCppParams(params)})${constSuffix}`;
       const start = line.lastIndexOf(name);
@@ -132,6 +126,7 @@ function parseCppDocument(document: vscode.TextDocument): ParsedSymbolCandidate[
         container,
         signature,
         range: new vscode.Range(lineIndex, start, lineIndex, start + name.length),
+        declarationRange: declarationLineRange(document, lineIndex),
         params,
         returnType
       });
@@ -142,7 +137,13 @@ function parseCppDocument(document: vscode.TextDocument): ParsedSymbolCandidate[
       if (methodMatch) {
         const returnType = normalizeWhitespace(methodMatch[1]);
         const name = methodMatch[2];
+        if (NON_DECLARATION_KEYWORDS.has(name)) {
+          return;
+        }
         const params = splitParams(methodMatch[3]);
+        if (params.some((param) => !param.type)) {
+          return;
+        }
         const constSuffix = methodMatch[4] ? ' const' : '';
         const container = classStack[classStack.length - 1]?.name;
         const namespacePrefix = namespaceStack.map((entry) => entry.name);
@@ -160,6 +161,7 @@ function parseCppDocument(document: vscode.TextDocument): ParsedSymbolCandidate[
           container: fullyQualifiedContainer,
           signature,
           range: new vscode.Range(lineIndex, start, lineIndex, start + name.length),
+          declarationRange: declarationLineRange(document, lineIndex),
           params,
           returnType
         });
@@ -211,4 +213,30 @@ function countOpenBraces(value: string): number {
 
 function countCloseBraces(value: string): number {
   return (value.match(/\}/g) ?? []).length;
+}
+
+function toResolvedSymbol(
+  context: SymbolEnumerationContext,
+  candidate: ParsedSymbolCandidate
+): ResolvedSymbol {
+  return {
+    kind: candidate.kind,
+    displayName: candidate.name,
+    canonicalSignature: candidate.signature,
+    sourceFile: context.document.uri,
+    sourceRelativePath: sourceRelativePathForDocument(
+      context.workspaceFolder,
+      context.document,
+      context.config
+    ),
+    symbolRange: candidate.range,
+    declarationRange: candidate.declarationRange ?? candidate.range,
+    containerName: candidate.container,
+    params: candidate.params,
+    returnType: candidate.returnType,
+    inheritanceChain: candidate.inheritanceChain,
+    frozenTypeArguments: candidate.frozenTypeArguments,
+    lookupName: signatureName(candidate.signature),
+    arity: signatureArity(candidate.signature)
+  };
 }

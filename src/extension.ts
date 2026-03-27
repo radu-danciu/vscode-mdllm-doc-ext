@@ -7,6 +7,7 @@ import { DocumentationService } from './core/documentationService';
 import { ExternalDocsDefinitionProvider } from './core/definitionProvider';
 import { ExternalDocsHoverProvider } from './core/hoverProvider';
 import { LanguageRegistry } from './core/languageRegistry';
+import { ExternalDocsRenameProvider } from './core/renameProvider';
 import { CppLanguageModule, CSharpLanguageModule, JsTsLanguageModule, PythonLanguageModule } from './languages';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -18,7 +19,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   ]);
   const docIndex = new DocIndex();
   const documentationService = new DocumentationService(registry, docIndex);
-  const selector = registry.getModules().flatMap((module) => module.languageIds.map((language) => ({ language })));
+  const selector = registry.getModules().flatMap((module) =>
+    module.languageIds.map((language) => ({ language, scheme: 'file' as const }))
+  );
 
   context.subscriptions.push(
     vscode.languages.registerHoverProvider(selector, new ExternalDocsHoverProvider(documentationService)),
@@ -26,6 +29,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       selector,
       new ExternalDocsDefinitionProvider(documentationService)
     ),
+    vscode.languages.registerRenameProvider(selector, new ExternalDocsRenameProvider(documentationService)),
     registerCreateSymbolDocumentationCommand(documentationService),
     registerOpenSymbolDocumentationCommand(documentationService),
     registerRebuildIndexCommand(documentationService),

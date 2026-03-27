@@ -13,15 +13,15 @@ Inheritance:
 
 ---
 
-### `DocumentationService.resolveAt(document: vscode.TextDocument, position: vscode.Position) -> Promise<ResolvedDocumentationTarget | null>`
+### `DocumentationService.isRenameSuppressed() -> boolean`
 
-Brief: Resolves the hovered or invoked source location into a supported symbol plus its mapped docs file.
+Brief: Reports whether this service is currently delegating rename work to the editor and should temporarily ignore its own rename provider.
 
 Details:
-Combines workspace config, language-module resolution, and mirrored path mapping in one place.
+This guard prevents recursive re-entry when source-driven rename sync calls back into VS Code's normal rename pipeline.
 
 Returns:
-Target metadata when a supported symbol is found, otherwise null.
+True while rename delegation is suppressed, otherwise false.
 
 ---
 
@@ -117,6 +117,22 @@ Params:
 
 Returns:
 Value returned by `withSuppressedDefinition`.
+
+---
+
+### `DocumentationService.withSuppressedRename(callback: () => Promise<T>) -> Promise<T>`
+
+Brief: Describes the repo-local method `withSuppressedRename` on `DocumentationService` in `src/core/documentationService.ts`.
+
+Details:
+This self-hosted entry keeps the workspace fully dogfooded for hover, definition, rename, and markdown lookup flows.
+
+Params:
+
+- `callback`: Input accepted by `withSuppressedRename`.
+
+Returns:
+Value returned by `withSuppressedRename`.
 
 ---
 
@@ -238,6 +254,24 @@ Value returned by `queryOtherDefinitionProviders`.
 
 ---
 
+### `DocumentationService.queryOtherRenameProviders(document: vscode.TextDocument, position: vscode.Position, newName: string) -> Promise<vscode.WorkspaceEdit | null>`
+
+Brief: Describes the repo-local method `queryOtherRenameProviders` on `DocumentationService` in `src/core/documentationService.ts`.
+
+Details:
+This self-hosted entry keeps the workspace fully dogfooded for hover, definition, rename, and markdown lookup flows.
+
+Params:
+
+- `document`: Input accepted by `queryOtherRenameProviders`.
+- `position`: Input accepted by `queryOtherRenameProviders`.
+- `newName`: Input accepted by `queryOtherRenameProviders`.
+
+Returns:
+Value returned by `queryOtherRenameProviders`.
+
+---
+
 ### `DocumentationService.hasLikelySourceDocumentation(candidates: readonly ResolvedDocumentationCandidate[]) -> boolean`
 
 Brief: Describes the repo-local method `hasLikelySourceDocumentation` on `DocumentationService` in `src/core/documentationService.ts`.
@@ -288,7 +322,7 @@ Value returned by `openDocumentation`.
 
 ---
 
-### `DocumentationService.getDocumentPositionFromTarget(target: CommandTarget) -> Promise<DocumentPosition | null>`
+### `DocumentationService.getDocumentPositionFromTarget(target?: CommandTarget) -> Promise<DocumentPosition | null>`
 
 Brief: Describes the repo-local method `getDocumentPositionFromTarget` on `DocumentationService` in `src/core/documentationService.ts`.
 

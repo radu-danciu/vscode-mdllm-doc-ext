@@ -29,6 +29,7 @@ interface DocumentPosition {
 export class DocumentationService {
   private hoverSuppressionDepth = 0;
   private definitionSuppressionDepth = 0;
+  private renameSuppressionDepth = 0;
 
   constructor(
     private readonly registry: LanguageRegistry,
@@ -47,6 +48,10 @@ export class DocumentationService {
     return this.definitionSuppressionDepth > 0;
   }
 
+  public isRenameSuppressed(): boolean {
+    return this.renameSuppressionDepth > 0;
+  }
+
   public async withSuppressedHover<T>(callback: () => Promise<T>): Promise<T> {
     this.hoverSuppressionDepth += 1;
     try {
@@ -62,6 +67,15 @@ export class DocumentationService {
       return await callback();
     } finally {
       this.definitionSuppressionDepth -= 1;
+    }
+  }
+
+  public async withSuppressedRename<T>(callback: () => Promise<T>): Promise<T> {
+    this.renameSuppressionDepth += 1;
+    try {
+      return await callback();
+    } finally {
+      this.renameSuppressionDepth -= 1;
     }
   }
 
@@ -185,6 +199,23 @@ export class DocumentationService {
           position
         )) ?? [];
       return results;
+    });
+  }
+
+  public async queryOtherRenameProviders(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    newName: string
+  ): Promise<vscode.WorkspaceEdit | null> {
+    return this.withSuppressedRename(async () => {
+      return (
+        (await vscode.commands.executeCommand<vscode.WorkspaceEdit | null>(
+          'vscode.executeDocumentRenameProvider',
+          document.uri,
+          position,
+          newName
+        )) ?? null
+      );
     });
   }
 

@@ -106,6 +106,32 @@ export function positionOf(document: vscode.TextDocument, token: string, occurre
   return new vscode.Position(0, 0);
 }
 
+export function positionInSnippet(
+  document: vscode.TextDocument,
+  snippet: string,
+  token: string,
+  occurrence = 1
+): vscode.Position {
+  const snippetOffset = document.getText().indexOf(snippet);
+  assert.notStrictEqual(snippetOffset, -1, `Snippet not found: ${snippet}`);
+
+  let fromIndex = snippetOffset;
+  for (let index = 0; index < occurrence; index += 1) {
+    const found = document.getText().indexOf(token, fromIndex);
+    assert.notStrictEqual(
+      found,
+      -1,
+      `Token "${token}" not found inside snippet "${snippet}".`
+    );
+    if (index === occurrence - 1) {
+      return document.positionAt(found);
+    }
+    fromIndex = found + token.length;
+  }
+
+  return new vscode.Position(0, 0);
+}
+
 export async function hoverText(
   editor: vscode.TextEditor,
   position: vscode.Position
@@ -135,12 +161,32 @@ export async function definitionsAt(
   editor: vscode.TextEditor,
   position: vscode.Position
 ): Promise<vscode.Location[]> {
-  return (
-    (await vscode.commands.executeCommand<vscode.Location[]>(
+  const definitions =
+    (await vscode.commands.executeCommand<Array<vscode.Location | vscode.LocationLink>>(
       'vscode.executeDefinitionProvider',
       editor.document.uri,
       position
-    )) ?? []
+    )) ?? [];
+
+  return definitions.map((definition) =>
+    'targetUri' in definition
+      ? new vscode.Location(definition.targetUri, definition.targetSelectionRange ?? definition.targetRange)
+      : definition
+  );
+}
+
+export async function renameEditsAt(
+  editor: vscode.TextEditor,
+  position: vscode.Position,
+  newName: string
+): Promise<vscode.WorkspaceEdit | null> {
+  return (
+    (await vscode.commands.executeCommand<vscode.WorkspaceEdit | null>(
+      'vscode.executeDocumentRenameProvider',
+      editor.document.uri,
+      position,
+      newName
+    )) ?? null
   );
 }
 

@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { JsTsLanguageModule } from '../../src/languages/jsTs/module';
-import { getWorkspaceFolder, openEditor, positionOf } from '../helpers';
+import { getWorkspaceFolder, openEditor, positionInSnippet, positionOf } from '../helpers';
 
 suite('js/ts language module', () => {
   const module = new JsTsLanguageModule();
@@ -139,5 +139,91 @@ suite('js/ts language module', () => {
 
     assert.match(stub, /Params:/);
     assert.match(stub, /Returns:/);
+  });
+
+  test('resolves multiline declaration positions to the same method signature', async () => {
+    const editor = await openEditor('src/core/definitionProvider.ts');
+    const workspaceFolder = getWorkspaceFolder();
+    const config = {
+      codeRoot: '.',
+      docsRoot: 'docs/api',
+      openMode: 'split' as const,
+      languageBuckets: {
+        cpp: 'cpp',
+        csharp: 'csharp',
+        typescript: 'ts',
+        javascript: 'js',
+        python: 'python'
+      }
+    };
+
+    const positions = [
+      positionOf(editor.document, 'provideDefinition'),
+      positionOf(editor.document, 'TextDocument'),
+      positionOf(editor.document, 'Promise')
+    ];
+
+    for (const position of positions) {
+      const symbol = await module.resolveSymbol({
+        document: editor.document,
+        position,
+        workspaceFolder,
+        config
+      });
+      assert.strictEqual(
+        symbol?.canonicalSignature,
+        'ExternalDocsDefinitionProvider.provideDefinition(document: vscode.TextDocument, position: vscode.Position) -> Promise<vscode.Definition | null>'
+      );
+    }
+  });
+
+  test('resolves private multiline methods with function-type params and complex return types', async () => {
+    const editor = await openEditor('src/core/documentationService.ts');
+    const workspaceFolder = getWorkspaceFolder();
+    const config = {
+      codeRoot: '.',
+      docsRoot: 'docs/api',
+      openMode: 'split' as const,
+      languageBuckets: {
+        cpp: 'cpp',
+        csharp: 'csharp',
+        typescript: 'ts',
+        javascript: 'js',
+        python: 'python'
+      }
+    };
+
+    const cases = [
+      {
+        snippet: 'public async withSuppressedHover<T>(',
+        probes: ['withSuppressedHover', 'callback', 'Promise'],
+        expected:
+          'DocumentationService.withSuppressedHover<T>(callback: () => Promise<T>) -> Promise<T>'
+      },
+      {
+        snippet: 'private async getDocumentPositionFromTarget(',
+        probes: ['getDocumentPositionFromTarget', 'CommandTarget', 'Promise'],
+        expected:
+          'DocumentationService.getDocumentPositionFromTarget(target?: CommandTarget) -> Promise<DocumentPosition | null>'
+      },
+      {
+        snippet: 'private async resolveCandidatesFromDefinitions(',
+        probes: ['resolveCandidatesFromDefinitions', 'TextDocument', 'Promise'],
+        expected:
+          'DocumentationService.resolveCandidatesFromDefinitions(document: vscode.TextDocument, position: vscode.Position, maxCandidates: number) -> Promise<ResolvedDocumentationCandidate[]>'
+      }
+    ];
+
+    for (const testCase of cases) {
+      for (const probe of testCase.probes) {
+        const symbol = await module.resolveSymbol({
+          document: editor.document,
+          position: positionInSnippet(editor.document, testCase.snippet, probe),
+          workspaceFolder,
+          config
+        });
+        assert.strictEqual(symbol?.canonicalSignature, testCase.expected);
+      }
+    }
   });
 });

@@ -2,197 +2,171 @@
 
 ### `SymbolKind`
 
-Brief: Defines the repo-local type `SymbolKind` in `src/core/types.ts`.
+Brief: Supported source symbol categories.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `OpenMode`
 
-Brief: Defines the repo-local type `OpenMode` in `src/core/types.ts`.
+Brief: Documentation open modes.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ExternalDocsConfig`
 
-Brief: Defines the repo-local type `ExternalDocsConfig` in `src/core/types.ts`.
+Brief: Normalized extension configuration.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `SymbolParam`
 
-Brief: Defines the repo-local type `SymbolParam` in `src/core/types.ts`.
+Brief: Normalized parameter metadata.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `FrozenTypeArgument`
 
-Brief: Defines the repo-local type `FrozenTypeArgument` in `src/core/types.ts`.
+Brief: Captured template or generic argument substitution.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ResolvedSymbol`
 
-Brief: Defines the repo-local type `ResolvedSymbol` in `src/core/types.ts`.
+Brief: Canonical resolved source symbol metadata.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `SymbolContext`
 
-Brief: Defines the repo-local type `SymbolContext` in `src/core/types.ts`.
+Brief: Lookup context for resolving a single symbol at a position.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `SymbolEnumerationContext`
+
+Brief: Lookup context for enumerating all symbols in a file.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `DocEntry`
 
-Brief: Defines the repo-local type `DocEntry` in `src/core/types.ts`.
+Brief: Parsed Markdown documentation entry.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ParsedDocFile`
 
-Brief: Defines the repo-local type `ParsedDocFile` in `src/core/types.ts`.
+Brief: Parsed mirrored docs file with source header and entries.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule`
 
-Brief: Defines the repo-local type `LanguageModule` in `src/core/types.ts`.
+Brief: Language-specific source resolver contract.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.canHandle(document: vscode.TextDocument) -> boolean`
 
-Brief: Describes the repo-local method `canHandle` on `LanguageModule` in `src/core/types.ts`.
+Brief: Reports whether the module handles a document.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `document`: Input accepted by `canHandle`.
-
-Returns:
-Value returned by `canHandle`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
 
-Brief: Describes the repo-local method `getLangBucket` on `LanguageModule` in `src/core/types.ts`.
+Brief: Returns the configured docs bucket for a document.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `document`: Input accepted by `getLangBucket`.
-- `config`: Input accepted by `getLangBucket`.
-
-Returns:
-Value returned by `getLangBucket`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.resolveSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
 
-Brief: Describes the repo-local method `resolveSymbol` on `LanguageModule` in `src/core/types.ts`.
+Brief: Resolves the best symbol at the current cursor position.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `context`: Input accepted by `resolveSymbol`.
+### `LanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
-Returns:
-Value returned by `resolveSymbol`.
+Brief: Enumerates the documentable symbols in a file.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.createStub(symbol: ResolvedSymbol) -> string`
 
-Brief: Describes the repo-local method `createStub` on `LanguageModule` in `src/core/types.ts`.
+Brief: Builds a mirrored docs stub for a resolved symbol.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `symbol`: Input accepted by `createStub`.
-
-Returns:
-Value returned by `createStub`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.normalizeSignature(signature: string) -> string`
 
-Brief: Describes the repo-local method `normalizeSignature` on `LanguageModule` in `src/core/types.ts`.
+Brief: Normalizes signature text for docs matching.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `signature`: Input accepted by `normalizeSignature`.
-
-Returns:
-Value returned by `normalizeSignature`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `LanguageModule.matchesEntry(symbol: ResolvedSymbol, entry: DocEntry) -> boolean`
 
-Brief: Describes the repo-local method `matchesEntry` on `LanguageModule` in `src/core/types.ts`.
+Brief: Per-language fallback matcher for docs entries.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `symbol`: Input accepted by `matchesEntry`.
-- `entry`: Input accepted by `matchesEntry`.
-
-Returns:
-Value returned by `matchesEntry`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `CommandTarget`
 
-Brief: Defines the repo-local type `CommandTarget` in `src/core/types.ts`.
+Brief: Serialized command target used by extension commands.
 
 Details:
-This entry keeps the repository self-documented so the extension can resolve its own type symbols while developing against this workspace.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---

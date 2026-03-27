@@ -5,7 +5,7 @@
 Brief: Activates the extension and registers providers, commands, and cache invalidation hooks.
 
 Details:
-This is the single entrypoint that wires the language modules into the shared core behavior.
+This is the single entrypoint that wires the language modules into the shared core behavior, including file-backed hover, definition, and rename providers.
 
 Returns:
 Activation completion.

@@ -2,91 +2,72 @@
 
 ### `ShowcaseRenderer`
 
-Brief: Interface used by the TypeScript showcase to demonstrate type-level documentation lookup.
+Brief: TypeScript showcase interface used to exercise type-level docs.
 
 Details:
-Hovering the interface or its method shows how mirrored markdown works for repository-local TypeScript type forms.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ShowcaseRenderer.render(title: string) -> string`
 
-Brief: Contract method used by the TypeScript showcase renderer.
+Brief: Interface method used to verify documented method lookup.
 
 Details:
-Use this entry to verify interface-method hover and markdown navigation behavior.
-
-Params:
-
-- `title`: Display label rendered by the showcase implementation.
-
-Returns:
-Formatted label text.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ShowcaseStatus`
 
-Brief: Simple TypeScript type alias used to verify alias hover coverage in the showcase workspace.
+Brief: Type alias used by the TypeScript showcase.
 
 Details:
-This entry exists so the showcase demonstrates external docs for aliases as well as classes and functions.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ShowcaseVector`
 
-Brief: Concrete TypeScript showcase type that implements the renderer contract.
+Brief: Concrete TypeScript showcase class.
 
 Details:
-Hover the class name or its call sites to validate mirrored markdown lookup against a real repo-local TypeScript file.
-
-Inheritance:
-
-- `ShowcaseRenderer`
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ShowcaseVector.magnitude() -> number`
 
-Brief: Returns the absolute vector magnitude in the TypeScript showcase.
+Brief: Returns the absolute showcase magnitude.
 
 Details:
-Use this method to verify declaration-site and call-site hover behavior for documented TypeScript class members.
-
-Returns:
-Absolute numeric magnitude.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `ShowcaseVector.render(title: string) -> string`
 
-Brief: Renders the TypeScript showcase label with the computed magnitude.
+Brief: Renders the showcase value as text.
 
 Details:
-This method demonstrates a documented class member that also satisfies an interface contract.
-
-Params:
-
-- `title`: Display label rendered by the showcase instance.
-
-Returns:
-Combined label and magnitude string.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `normalizeShowcase(value: number) -> number`
 
-Brief: Normalizes a numeric input in the TypeScript showcase file.
+Brief: Normalizes a numeric value in the TypeScript showcase.
 
 Details:
-Hover the declaration or the local call site at the bottom of the file to confirm the extension resolves the same markdown entry.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `value`: Input number to normalize.
+### `builtinCommentShowcase(name: string) -> string`
 
-Returns:
-Absolute numeric value.
+Brief: Source-comment fallback showcase function kept documented for audit parity.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---

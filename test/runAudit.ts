@@ -9,7 +9,8 @@ async function main(): Promise<void> {
     extensionDevelopmentPath,
     extensionTestsPath,
     extensionTestsEnv: {
-      TEST_GROUPS: 'core,languages,audit'
+      TEST_GROUPS: 'audit',
+      AUDIT_PRINT_REPORT: process.argv.includes('--report') ? '1' : '0'
     },
     launchArgs: [extensionDevelopmentPath, '--disable-extensions']
   });

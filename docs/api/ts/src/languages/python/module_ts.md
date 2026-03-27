@@ -2,177 +2,99 @@
 
 ### `PythonLanguageModule`
 
-Brief: Resolves Python declarations into canonical signatures for mirrored docs lookup.
+Brief: Python resolver backed by deterministic text parsing.
 
 Details:
-The module infers module-qualified paths, class nesting, callable signatures, inheritance, and template-like type arguments from straightforward source-text parsing.
-
-Inheritance:
-
-- `LanguageModule`
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `PythonLanguageModule.canHandle(document: vscode.TextDocument) -> boolean`
 
-Brief: Reports whether the module should parse the current document as Python.
+Brief: Reports whether the module handles the current document.
 
 Details:
-The check only accepts the `python` language identifier so unsupported files fail fast before any parser work begins.
-
-Params:
-
-- `document`: Text document being evaluated.
-
-Returns:
-True when the document language ID is `python`.
-
----
-
-### `PythonLanguageModule.getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
-
-Brief: Returns the configured docs bucket for Python sources.
-
-Details:
-All Python files map into the Python language bucket from workspace configuration.
-
-Params:
-
-- `document`: Text document being resolved.
-- `config`: Normalized external docs configuration.
-
-Returns:
-Python docs bucket name from the workspace settings.
-
----
-
-### `PythonLanguageModule.resolveSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
-
-Brief: Resolves the symbol at the current cursor position from a Python document.
-
-Details:
-The method combines identifier lookup, parsed-candidate range checks, module-path derivation, and canonical metadata assembly for downstream docs matching.
-
-Params:
-
-- `context`: Resolution context including document, workspace, and config data.
-
-Returns:
-Resolved symbol metadata when a matching declaration is found, otherwise null.
-
----
-
-### `PythonLanguageModule.createStub(symbol: ResolvedSymbol) -> string`
-
-Brief: Generates the default Markdown stub for a resolved Python symbol.
-
-Details:
-The implementation delegates to the shared stub builder so Python docs entries follow the same section layout as the rest of the repo.
-
-Params:
-
-- `symbol`: Resolved symbol to document.
-
-Returns:
-Template Markdown for a new mirrored docs entry.
-
----
-
-### `PythonLanguageModule.normalizeSignature(signature: string) -> string`
-
-Brief: Normalizes Python signature spacing before docs matching.
-
-Details:
-The method stabilizes dotted paths, arrow spacing, and comma spacing so Markdown entries and resolved source symbols compare consistently.
-
-Params:
-
-- `signature`: Raw signature text.
-
-Returns:
-Normalized signature string suitable for index comparison.
-
----
-
-### `PythonLanguageModule.matchesEntry(symbol: ResolvedSymbol, entry: { signature: string }) -> boolean`
-
-Brief: Matches a resolved Python symbol against a parsed docs entry by name and arity.
-
-Details:
-This keeps overload-like callable matching simple and resilient even when signatures differ in formatting details.
-
-Params:
-
-- `symbol`: Resolved source symbol.
-- `entry`: Parsed Markdown entry candidate.
-
-Returns:
-True when the entry matches the symbol's normalized name and parameter count.
-
----
-
-### `parsePythonDocument(document: vscode.TextDocument, context: SymbolContext) -> ParsedSymbolCandidate[]`
-
-Brief: Parses a Python document into candidate class, function, and method declarations.
-
-Details:
-The parser derives the module path from the configured source root, tracks indentation-based class nesting, and emits canonical signatures for later docs lookup.
-
-Params:
-
-- `document`: Source document to scan.
-- `context`: Resolution context used to compute the module-relative path.
-
-Returns:
-Parsed symbol candidates in source order.
-
----
-
-### `extractTemplateValues(value?: string) -> Array<{ name: string; value: string }> | undefined`
-
-Brief: Extracts bracketed template-like values from Python base-type text.
-
-Details:
-The helper supports both square-bracket and angle-bracket forms so generic base classes can populate template argument placeholders in generated stubs.
-
-Params:
-
-- `value`: Type text that may include generic arguments.
-
-Returns:
-Template argument mappings, or undefined when no generic argument list is present.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `PythonLanguageModule.getLangBucket(_document: vscode.TextDocument, config: ExternalDocsConfig) -> string`
 
-Brief: Describes the repo-local method `getLangBucket` on `PythonLanguageModule` in `src/languages/python/module.ts`.
+Brief: Returns the configured Python docs bucket.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `_document`: Input accepted by `getLangBucket`.
-- `config`: Input accepted by `getLangBucket`.
-
-Returns:
-Value returned by `getLangBucket`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
-### `extractTemplateValues(value: string) -> Array<{ name: string; value: string }> | undefined`
+### `PythonLanguageModule.resolveSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
 
-Brief: Describes the repo-local function `extractTemplateValues` in `src/languages/python/module.ts`.
+Brief: Resolves a Python symbol at the current position.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `value`: Input accepted by `extractTemplateValues`.
+### `PythonLanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
-Returns:
-Value returned by `extractTemplateValues`.
+Brief: Enumerates Python symbols in a file.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `PythonLanguageModule.createStub(symbol: ResolvedSymbol) -> string`
+
+Brief: Builds a mirrored docs stub for a Python symbol.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `PythonLanguageModule.normalizeSignature(signature: string) -> string`
+
+Brief: Normalizes Python signature spacing for lookup.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `PythonLanguageModule.matchesEntry(symbol: ResolvedSymbol, entry: { signature: string }) -> boolean`
+
+Brief: Fallback entry matcher for Python docs.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `parsePythonDocument(document: vscode.TextDocument, context: SymbolEnumerationContext) -> ParsedSymbolCandidate[]`
+
+Brief: Parses a Python source file into candidate declarations.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `extractTemplateValues(value?: string) -> Array<{ name: string; value: string }> | undefined`
+
+Brief: Extracts template-like values from a Python type string.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `toResolvedSymbol(context: SymbolEnumerationContext, candidate: ParsedSymbolCandidate) -> ResolvedSymbol`
+
+Brief: Promotes a parsed Python candidate into a resolved symbol.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---

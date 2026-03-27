@@ -2,76 +2,72 @@
 
 ### `DocIndex`
 
-Brief: Caches parsed Markdown files and resolves symbol entries from them.
+Brief: Caches parsed mirrored Markdown files and resolves entries.
 
 Details:
-Hover, definition navigation, and create-doc commands all rely on this index to avoid reparsing every docs file on each interaction.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Inheritance:
+---
 
-- `none`
+### `DocIndexMatchType`
+
+Brief: Detailed match classification returned by the docs index.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `DocIndexMatchResult`
+
+Brief: Detailed docs-index lookup result with match mode and entry.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `DocIndex.clear() -> void`
 
-Brief: Describes the repo-local method `clear` on `DocIndex` in `src/core/docIndex.ts`.
+Brief: Clears the parsed-doc cache.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Returns:
-Value returned by `clear`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `DocIndex.invalidate(uri: vscode.Uri) -> void`
 
-Brief: Describes the repo-local method `invalidate` on `DocIndex` in `src/core/docIndex.ts`.
+Brief: Invalidates a single cached Markdown file.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `uri`: Input accepted by `invalidate`.
-
-Returns:
-Value returned by `invalidate`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `DocIndex.getParsedDoc(uri: vscode.Uri, normalizeSignature: (signature: string) => string) -> Promise<ParsedDocFile | null>`
 
-Brief: Describes the repo-local method `getParsedDoc` on `DocIndex` in `src/core/docIndex.ts`.
+Brief: Loads and parses a mirrored docs file.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
-
-Params:
-
-- `uri`: Input accepted by `getParsedDoc`.
-- `normalizeSignature`: Input accepted by `getParsedDoc`.
-
-Returns:
-Value returned by `getParsedDoc`.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
 
 ### `DocIndex.findEntry(uri: vscode.Uri, symbol: ResolvedSymbol, module: LanguageModule) -> Promise<DocEntry | null>`
 
-Brief: Describes the repo-local method `findEntry` on `DocIndex` in `src/core/docIndex.ts`.
+Brief: Finds the best docs entry for a resolved symbol.
 
 Details:
-This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
-Params:
+---
 
-- `uri`: Input accepted by `findEntry`.
-- `symbol`: Input accepted by `findEntry`.
-- `module`: Input accepted by `findEntry`.
+### `DocIndex.findEntryDetailed(uri: vscode.Uri, symbol: ResolvedSymbol, module: LanguageModule) -> Promise<DocIndexMatchResult>`
 
-Returns:
-Value returned by `findEntry`.
+Brief: Finds the best docs entry and reports how it matched.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
