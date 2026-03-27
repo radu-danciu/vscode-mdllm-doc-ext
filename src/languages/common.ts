@@ -8,6 +8,7 @@ export interface ParsedSymbolCandidate {
   container?: string;
   signature: string;
   kind: 'function' | 'method' | 'type' | 'object';
+  runtimeAlias?: boolean;
   returnType?: string;
   params?: Array<{ name: string; type?: string }>;
   inheritanceChain?: string[];

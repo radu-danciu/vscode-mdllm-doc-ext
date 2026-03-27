@@ -247,45 +247,248 @@ export async function runRuntimeAudit(): Promise<RuntimeAuditResult> {
 }
 
 export function formatRuntimeAuditDiagnostics(result: RuntimeAuditResult): string {
-  if (result.diagnostics.length === 0) {
-    return 'Runtime audit found no symbol-vs-doc mismatches.';
+  const red = (value: string) => `\x1b[31m${value}\x1b[0m`;
+  const green = (value: string) => `\x1b[32m${value}\x1b[0m`;
+  const blue = (value: string) => `\x1b[34m${value}\x1b[0m`;
+  const bold = (value: string) => `\x1b[1m${value}\x1b[0m`;
+
+  const codeDiagnosticsByKey = new Map<string, RuntimeAuditDiagnostic[]>();
+  const staleDiagnosticsByFile = new Map<string, RuntimeAuditDiagnostic[]>();
+
+  for (const diagnostic of result.diagnostics) {
+    if (diagnostic.codeSignature && diagnostic.sourceRelativePath) {
+      const key = `${diagnostic.sourceRelativePath}::${diagnostic.codeSignature}`;
+      const bucket = codeDiagnosticsByKey.get(key) ?? [];
+      bucket.push(diagnostic);
+      codeDiagnosticsByKey.set(key, bucket);
+    }
+
+    if (isStaleDiagnostic(diagnostic.category)) {
+      const fileKey = diagnostic.docsRelativePath;
+      const bucket = staleDiagnosticsByFile.get(fileKey) ?? [];
+      bucket.push(diagnostic);
+      staleDiagnosticsByFile.set(fileKey, bucket);
+    }
   }
 
-  const byCategory = new Map<AuditDiagnosticCategory, RuntimeAuditDiagnostic[]>();
-  for (const diagnostic of result.diagnostics) {
-    const bucket = byCategory.get(diagnostic.category) ?? [];
-    bucket.push(diagnostic);
-    byCategory.set(diagnostic.category, bucket);
+  const matchesByKey = new Map<string, RuntimeAuditMatch>();
+  for (const match of result.matches) {
+    const key = `${match.codeSymbol.symbol.sourceRelativePath}::${match.codeSymbol.symbol.canonicalSignature}`;
+    matchesByKey.set(key, match);
+  }
+
+  const codeSymbolsByFile = new Map<string, RuntimeAuditCodeSymbol[]>();
+  for (const entry of result.codeSymbols) {
+    const bucket = codeSymbolsByFile.get(entry.symbol.sourceRelativePath) ?? [];
+    bucket.push(entry);
+    codeSymbolsByFile.set(entry.symbol.sourceRelativePath, bucket);
   }
 
   const sections: string[] = [];
-  for (const category of [
-    'missing_docs',
-    'lookup_failures',
-    'high_confidence_partial_matches',
-    'ambiguous_partial_matches',
-    'unreferenced_docs',
-    'doc_header_path_mismatches'
-  ] as AuditDiagnosticCategory[]) {
-    const diagnostics = byCategory.get(category);
-    if (!diagnostics || diagnostics.length === 0) {
-      continue;
-    }
+  sections.push(bold('Code Symbols:'));
+  for (const [sourceRelativePath, entries] of [...codeSymbolsByFile.entries()].sort((left, right) =>
+    left[0].localeCompare(right[0])
+  )) {
+    sections.push(sourceRelativePath);
+    renderCodeFileSection(
+      sections,
+      entries,
+      matchesByKey,
+      codeDiagnosticsByKey,
+      green,
+      red
+    );
+  }
 
-    sections.push(`${category}:`);
-    for (const diagnostic of diagnostics) {
-      const identity = diagnostic.codeSignature ?? diagnostic.documentedSignature ?? '(unknown symbol)';
-      sections.push(
-        `- ${diagnostic.sourceRelativePath ?? '(no source header)'} :: ${identity} -> ${diagnostic.docsRelativePath}`
-      );
-      sections.push(`  ${diagnostic.detail}`);
-      if (diagnostic.relatedSignatures && diagnostic.relatedSignatures.length > 0) {
-        sections.push(`  related: ${diagnostic.relatedSignatures.join(' | ')}`);
+  sections.push('');
+  sections.push(red(bold('Undocumented:')));
+  const unresolvedCodeDiagnostics = result.diagnostics.filter((diagnostic) =>
+    isCodeSideFailure(diagnostic.category)
+  );
+  if (unresolvedCodeDiagnostics.length === 0) {
+    sections.push(`  ${green('None')}`);
+  } else {
+    for (const [sourceRelativePath, diagnostics] of groupDiagnosticsBySource(unresolvedCodeDiagnostics)) {
+      sections.push(sourceRelativePath);
+      for (const diagnostic of diagnostics) {
+        sections.push(
+          `  ${red('✘')} ${diagnostic.codeSignature ?? diagnostic.documentedSignature ?? '(unknown symbol)'}`
+        );
+        sections.push(`    ${diagnostic.detail}`);
+        if (diagnostic.relatedSignatures?.length) {
+          sections.push(`    related: ${diagnostic.relatedSignatures.join(' | ')}`);
+        }
+      }
+    }
+  }
+
+  sections.push('');
+  sections.push(blue(bold('Stale documentation:')));
+  if (staleDiagnosticsByFile.size === 0) {
+    sections.push(`  ${green('None')}`);
+  } else {
+    for (const [docsRelativePath, diagnostics] of [...staleDiagnosticsByFile.entries()].sort((left, right) =>
+      left[0].localeCompare(right[0])
+    )) {
+      sections.push(docsRelativePath);
+      for (const diagnostic of diagnostics.sort((left, right) => {
+        const leftLine = findHeadingLine(result.docsEntries, left);
+        const rightLine = findHeadingLine(result.docsEntries, right);
+        return leftLine - rightLine || (left.documentedSignature ?? '').localeCompare(right.documentedSignature ?? '');
+      })) {
+        const lineNumber = findHeadingLine(result.docsEntries, diagnostic);
+        const identity =
+          diagnostic.documentedSignature ?? diagnostic.codeSignature ?? '(unknown symbol)';
+        const category = diagnostic.category.replace(/_/g, ' ');
+        sections.push(`  ${blue('•')} line ${lineNumber}: ${identity} [${category}]`);
+        sections.push(`    ${diagnostic.detail}`);
+        if (diagnostic.relatedSignatures?.length) {
+          sections.push(`    related: ${diagnostic.relatedSignatures.join(' | ')}`);
+        }
       }
     }
   }
 
   return sections.join('\n');
+}
+
+function renderCodeFileSection(
+  lines: string[],
+  entries: RuntimeAuditCodeSymbol[],
+  matchesByKey: Map<string, RuntimeAuditMatch>,
+  diagnosticsByKey: Map<string, RuntimeAuditDiagnostic[]>,
+  green: (value: string) => string,
+  red: (value: string) => string
+): void {
+  const topLevelTypes = entries
+    .filter((entry) => entry.symbol.kind === 'type')
+    .sort(compareCodeSymbols);
+  const topLevelObjects = entries
+    .filter((entry) => entry.symbol.kind === 'object')
+    .sort(compareCodeSymbols);
+  const topLevelFunctions = entries
+    .filter((entry) => entry.symbol.kind === 'function' && !entry.symbol.containerName)
+    .sort(compareCodeSymbols);
+
+  if (topLevelTypes.length > 0) {
+    lines.push('  Types');
+    for (const entry of topLevelTypes) {
+      renderCodeSymbolLine(lines, entry, matchesByKey, diagnosticsByKey, green, red, 4);
+      const methods = entries
+        .filter(
+          (candidate) =>
+            candidate.symbol.kind === 'method' && candidate.symbol.containerName === entry.symbol.displayName
+        )
+        .sort(compareCodeSymbols);
+      for (const method of methods) {
+        renderCodeSymbolLine(lines, method, matchesByKey, diagnosticsByKey, green, red, 6);
+      }
+    }
+  }
+
+  if (topLevelObjects.length > 0) {
+    lines.push('  Objects');
+    for (const entry of topLevelObjects) {
+      renderCodeSymbolLine(lines, entry, matchesByKey, diagnosticsByKey, green, red, 4);
+      const methods = entries
+        .filter(
+          (candidate) =>
+            candidate.symbol.kind === 'method' && candidate.symbol.containerName === entry.symbol.displayName
+        )
+        .sort(compareCodeSymbols);
+      for (const method of methods) {
+        renderCodeSymbolLine(lines, method, matchesByKey, diagnosticsByKey, green, red, 6);
+      }
+    }
+  }
+
+  if (topLevelFunctions.length > 0) {
+    lines.push('  Functions');
+    for (const entry of topLevelFunctions) {
+      renderCodeSymbolLine(lines, entry, matchesByKey, diagnosticsByKey, green, red, 4);
+    }
+  }
+}
+
+function renderCodeSymbolLine(
+  lines: string[],
+  entry: RuntimeAuditCodeSymbol,
+  matchesByKey: Map<string, RuntimeAuditMatch>,
+  diagnosticsByKey: Map<string, RuntimeAuditDiagnostic[]>,
+  green: (value: string) => string,
+  red: (value: string) => string,
+  indent: number
+): void {
+  const key = `${entry.symbol.sourceRelativePath}::${entry.symbol.canonicalSignature}`;
+  const matched = Boolean(matchesByKey.get(key)?.entry);
+  const diagnostics = diagnosticsByKey.get(key) ?? [];
+  const marker = matched ? green('✔') : red('✘');
+  const suffix =
+    diagnostics.length > 0
+      ? ` ${red(`(${diagnostics.map((diagnostic) => diagnostic.category.replace(/_/g, ' ')).join(', ')})`)}`
+      : '';
+  lines.push(`${' '.repeat(indent)}${marker} ${displaySymbolLabel(entry.symbol)}${suffix}`);
+}
+
+function displaySymbolLabel(symbol: ResolvedSymbol): string {
+  if (symbol.kind === 'method' && symbol.containerName) {
+    return symbol.canonicalSignature.replace(new RegExp(`^${escapeRegex(symbol.containerName)}\\.`), '');
+  }
+
+  return symbol.canonicalSignature;
+}
+
+function compareCodeSymbols(left: RuntimeAuditCodeSymbol, right: RuntimeAuditCodeSymbol): number {
+  return left.symbol.canonicalSignature.localeCompare(right.symbol.canonicalSignature);
+}
+
+function groupDiagnosticsBySource(
+  diagnostics: RuntimeAuditDiagnostic[]
+): Array<[string, RuntimeAuditDiagnostic[]]> {
+  const grouped = new Map<string, RuntimeAuditDiagnostic[]>();
+  for (const diagnostic of diagnostics) {
+    const key = diagnostic.sourceRelativePath ?? '(no source header)';
+    const bucket = grouped.get(key) ?? [];
+    bucket.push(diagnostic);
+    grouped.set(key, bucket);
+  }
+
+  return [...grouped.entries()]
+    .sort((left, right) => left[0].localeCompare(right[0]))
+    .map(([key, value]) => [
+      key,
+      value.sort((left, right) =>
+        `${left.codeSignature ?? left.documentedSignature ?? ''}`.localeCompare(
+          `${right.codeSignature ?? right.documentedSignature ?? ''}`
+        )
+      )
+    ]);
+}
+
+function isCodeSideFailure(category: AuditDiagnosticCategory): boolean {
+  return category === 'missing_docs' || category === 'lookup_failures';
+}
+
+function isStaleDiagnostic(category: AuditDiagnosticCategory): boolean {
+  return (
+    category === 'lookup_failures' ||
+    category === 'high_confidence_partial_matches' ||
+    category === 'ambiguous_partial_matches' ||
+    category === 'unreferenced_docs' ||
+    category === 'doc_header_path_mismatches'
+  );
+}
+
+function findHeadingLine(
+  docsEntries: readonly RuntimeAuditDocumentedEntry[],
+  diagnostic: RuntimeAuditDiagnostic
+): number {
+  const entry = docsEntries.find(
+    (candidate) =>
+      candidate.docsRelativePath === diagnostic.docsRelativePath &&
+      candidate.signature === diagnostic.documentedSignature
+  );
+  return (entry?.headingLine ?? 0) + 1;
 }
 
 function sortDiagnostics(diagnostics: RuntimeAuditDiagnostic[]): RuntimeAuditDiagnostic[] {

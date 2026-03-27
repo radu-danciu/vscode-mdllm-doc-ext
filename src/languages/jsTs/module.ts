@@ -43,8 +43,19 @@ export class JsTsLanguageModule implements LanguageModule {
     return toResolvedSymbol(context, candidate);
   }
 
+  public async resolveUsageSymbol(context: SymbolContext): Promise<ResolvedSymbol | null> {
+    const usage = findConstructorUsageCandidate(context.document, context.position);
+    if (!usage) {
+      return null;
+    }
+
+    return toResolvedSymbol(context, usage);
+  }
+
   public async listSymbols(context: SymbolEnumerationContext): Promise<ResolvedSymbol[]> {
-    return parseJsTsDocument(context.document).map((candidate) => toResolvedSymbol(context, candidate));
+    return parseJsTsDocument(context.document)
+      .filter((candidate) => !candidate.runtimeAlias)
+      .map((candidate) => toResolvedSymbol(context, candidate));
   }
 
   public createStub(symbol: ResolvedSymbol): string {
@@ -82,6 +93,43 @@ function parseJsTsDocument(document: vscode.TextDocument): ParsedSymbolCandidate
   return candidates;
 }
 
+function findConstructorUsageCandidate(
+  document: vscode.TextDocument,
+  position: vscode.Position
+): ParsedSymbolCandidate | null {
+  const sourceFile = ts.createSourceFile(
+    document.fileName,
+    document.getText(),
+    ts.ScriptTarget.Latest,
+    true,
+    scriptKindFor(document.languageId)
+  );
+  const offset = document.offsetAt(position);
+  const targetNode = findInnermostNodeAtOffset(sourceFile, offset);
+  if (!targetNode || !ts.isIdentifier(targetNode)) {
+    return null;
+  }
+
+  const newExpression =
+    ts.isNewExpression(targetNode.parent) && targetNode.parent.expression === targetNode
+      ? targetNode.parent
+      : null;
+  if (!newExpression) {
+    return null;
+  }
+
+  const constructorName = targetNode.text;
+  const candidates = parseJsTsDocument(document);
+  return (
+    candidates.find(
+      (candidate) =>
+        candidate.kind === 'type' &&
+        stripGenericSuffix(signatureName(candidate.signature)) === constructorName &&
+        !candidate.runtimeAlias
+    ) ?? null
+  );
+}
+
 function collectStatementCandidates(
   document: vscode.TextDocument,
   sourceFile: ts.SourceFile,
@@ -97,17 +145,25 @@ function collectStatementCandidates(
 
   if (ts.isClassDeclaration(statement) && statement.name) {
     const className = statement.name.text;
+    const classSignature = renderTypeName(className, statement.typeParameters);
     candidates.push(
       createTypeCandidate(
         document,
         sourceFile,
         statement.name,
-        renderTypeName(className, statement.typeParameters),
+        classSignature,
         collectHeritage(statement.heritageClauses)
       )
     );
     for (const member of statement.members) {
-      collectClassMemberCandidates(document, sourceFile, className, member, candidates);
+      collectClassMemberCandidates(
+        document,
+        sourceFile,
+        className,
+        classSignature,
+        member,
+        candidates
+      );
     }
     return;
   }
@@ -205,10 +261,27 @@ function collectClassMemberCandidates(
   document: vscode.TextDocument,
   sourceFile: ts.SourceFile,
   className: string,
+  classSignature: string,
   member: ts.ClassElement,
   candidates: ParsedSymbolCandidate[]
 ): void {
-  if (ts.isConstructorDeclaration(member) || !('name' in member) || !member.name) {
+  if (ts.isConstructorDeclaration(member)) {
+    const constructorStart = member.getStart(sourceFile);
+    candidates.push({
+      name: classSignature,
+      kind: 'type',
+      signature: classSignature,
+      range: new vscode.Range(
+        document.positionAt(constructorStart),
+        document.positionAt(constructorStart + 'constructor'.length)
+      ),
+      declarationRange: declarationRangeForNode(document, sourceFile, member),
+      runtimeAlias: true
+    });
+    return;
+  }
+
+  if (!('name' in member) || !member.name) {
     return;
   }
 
@@ -322,6 +395,7 @@ function declarationRangeForNode(
   document: vscode.TextDocument,
   sourceFile: ts.SourceFile,
   node:
+    | ts.ConstructorDeclaration
     | ts.FunctionDeclaration
     | ts.MethodDeclaration
     | ts.MethodSignature
@@ -504,4 +578,20 @@ function scriptKindFor(languageId: string): ts.ScriptKind {
 
 function stripGenericSuffix(value: string): string {
   return value.replace(/<.*>$/, '');
+}
+
+function findInnermostNodeAtOffset(node: ts.Node, offset: number): ts.Node | null {
+  if (offset < node.getFullStart() || offset >= node.getEnd()) {
+    return null;
+  }
+
+  let best: ts.Node | null = null;
+  node.forEachChild((child) => {
+    const candidate = findInnermostNodeAtOffset(child, offset);
+    if (candidate) {
+      best = candidate;
+    }
+  });
+
+  return best ?? node;
 }

@@ -226,4 +226,44 @@ suite('js/ts language module', () => {
       }
     }
   });
+
+  test('resolves constructor usage sites in the same file', async () => {
+    const workspaceFolder = getWorkspaceFolder();
+    const tsConfig = {
+      codeRoot: '.',
+      docsRoot: 'docs/api',
+      openMode: 'split' as const,
+      languageBuckets: {
+        cpp: 'cpp',
+        csharp: 'csharp',
+        typescript: 'ts',
+        javascript: 'js',
+        python: 'python'
+      }
+    };
+
+    const tsEditor = await openEditor('showcase/ts/showcase.ts');
+    const tsUsage = await module.resolveUsageSymbol?.({
+      document: tsEditor.document,
+      position: positionInSnippet(tsEditor.document, 'new ShowcaseVector(-4);', 'ShowcaseVector'),
+      workspaceFolder,
+      config: tsConfig
+    });
+    assert.strictEqual(tsUsage?.canonicalSignature, 'ShowcaseVector');
+
+    const jsEditor = await openEditor('showcase/js/showcase.js');
+    const jsConfig = {
+      ...tsConfig,
+      languageBuckets: {
+        ...tsConfig.languageBuckets
+      }
+    };
+    const jsUsage = await module.resolveUsageSymbol?.({
+      document: jsEditor.document,
+      position: positionInSnippet(jsEditor.document, 'new ShowcaseCounter();', 'ShowcaseCounter'),
+      workspaceFolder,
+      config: jsConfig
+    });
+    assert.strictEqual(jsUsage?.canonicalSignature, 'ShowcaseCounter');
+  });
 });

@@ -75,6 +75,7 @@ export interface LanguageModule {
   canHandle(document: vscode.TextDocument): boolean;
   getLangBucket(document: vscode.TextDocument, config: ExternalDocsConfig): string;
   resolveSymbol(context: SymbolContext): Promise<ResolvedSymbol | null>;
+  resolveUsageSymbol?(context: SymbolContext): Promise<ResolvedSymbol | null>;
   listSymbols(context: SymbolEnumerationContext): Promise<ResolvedSymbol[]>;
   createStub(symbol: ResolvedSymbol): string;
   normalizeSignature(signature: string): string;

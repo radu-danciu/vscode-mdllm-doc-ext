@@ -220,6 +220,23 @@ Value returned by `resolveDocumentationCandidates`.
 
 ---
 
+### `DocumentationService.resolveUsageAt(document: vscode.TextDocument, position: vscode.Position) -> Promise<ResolvedDocumentationTarget | null>`
+
+Brief: Describes the repo-local method `resolveUsageAt` on `DocumentationService` in `src/core/documentationService.ts`.
+
+Details:
+This self-hosted entry keeps the workspace fully dogfooded for hover, definition, and markdown lookup flows.
+
+Params:
+
+- `document`: Input accepted by `resolveUsageAt`.
+- `position`: Input accepted by `resolveUsageAt`.
+
+Returns:
+Value returned by `resolveUsageAt`.
+
+---
+
 ### `DocumentationService.queryOtherHoverProviders(document: vscode.TextDocument, position: vscode.Position) -> Promise<vscode.Hover[]>`
 
 Brief: Describes the repo-local method `queryOtherHoverProviders` on `DocumentationService` in `src/core/documentationService.ts`.

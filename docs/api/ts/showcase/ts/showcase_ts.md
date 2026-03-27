@@ -62,12 +62,3 @@ Details:
 Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
 
 ---
-
-### `builtinCommentShowcase(name: string) -> string`
-
-Brief: Source-comment fallback showcase function kept documented for audit parity.
-
-Details:
-Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
-
----

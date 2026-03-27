@@ -321,6 +321,35 @@ suite('hover provider integration', () => {
     assert.match(hover, /Open full documentation/);
   });
 
+  test('shows external docs at constructor call sites for js\/ts classes', async () => {
+    const cases = [
+      {
+        relativePath: 'showcase/ts/showcase.ts',
+        snippet: 'new ShowcaseVector(-4);',
+        token: 'ShowcaseVector',
+        expected: /Brief: Concrete TypeScript showcase class/
+      },
+      {
+        relativePath: 'showcase/js/showcase.js',
+        snippet: 'new ShowcaseCounter();',
+        token: 'ShowcaseCounter',
+        expected: /Brief: Small JavaScript showcase class used to demonstrate class-level markdown lookup/
+      }
+    ];
+
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+
+    for (const testCase of cases) {
+      const editor = await openEditor(testCase.relativePath);
+      const hover = await hoverText(
+        editor,
+        positionInSnippet(editor.document, testCase.snippet, testCase.token)
+      );
+      assert.match(hover, testCase.expected);
+      assert.match(hover, /Open full documentation/);
+    }
+  });
+
   test('shows a compact chooser for ambiguous call-site matches', async () => {
     await configureWorkspace({
       codeRoot: tempRoot,

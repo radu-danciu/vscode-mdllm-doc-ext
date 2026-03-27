@@ -36,6 +36,15 @@ Self-hosted mirrored documentation entry used for runtime lookup and repo dogfoo
 
 ---
 
+### `JsTsLanguageModule.resolveUsageSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
+
+Brief: Resolves a conservative JavaScript or TypeScript usage-site symbol when declaration lookup is unavailable.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
 ### `JsTsLanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
 Brief: Enumerates JavaScript and TypeScript symbols in a file.
@@ -81,6 +90,15 @@ Self-hosted mirrored documentation entry used for runtime lookup and repo dogfoo
 
 ---
 
+### `findConstructorUsageCandidate(document: vscode.TextDocument, position: vscode.Position) -> ParsedSymbolCandidate | null`
+
+Brief: Resolves a same-file constructor usage to the owning class candidate.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
 ### `collectStatementCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, statement: ts.Statement, candidates: ParsedSymbolCandidate[]) -> void`
 
 Brief: Collects candidates from a top-level source statement.
@@ -99,7 +117,7 @@ Self-hosted mirrored documentation entry used for runtime lookup and repo dogfoo
 
 ---
 
-### `collectClassMemberCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, className: string, member: ts.ClassElement, candidates: ParsedSymbolCandidate[]) -> void`
+### `collectClassMemberCandidates(document: vscode.TextDocument, sourceFile: ts.SourceFile, className: string, classSignature: string, member: ts.ClassElement, candidates: ParsedSymbolCandidate[]) -> void`
 
 Brief: Collects candidates from a class member declaration.
 
@@ -201,6 +219,15 @@ Self-hosted mirrored documentation entry used for runtime lookup and repo dogfoo
 ### `renderReturnType(node: | ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature | ts.FunctionExpression | ts.ArrowFunction | ts.GetAccessorDeclaration | ts.SetAccessorDeclaration, sourceFile: ts.SourceFile) -> string | undefined`
 
 Brief: Renders a normalized callable return type from an AST node.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
+### `findInnermostNodeAtOffset(node: ts.Node, offset: number) -> ts.Node | null`
+
+Brief: Finds the deepest AST node containing a document offset.
 
 Details:
 Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.

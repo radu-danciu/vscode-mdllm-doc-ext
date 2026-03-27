@@ -9,6 +9,7 @@ import { LanguageRegistry } from '../../src/core/languageRegistry';
 import { CppLanguageModule, CSharpLanguageModule, JsTsLanguageModule, PythonLanguageModule } from '../../src/languages';
 import {
   configureWorkspace,
+  definitionsAt,
   openEditor,
   positionInSnippet,
   positionOf,
@@ -277,5 +278,65 @@ suite('documentationService', () => {
         assert.strictEqual(candidates[0].entry?.signature, testCase.expected);
       }
     }
+  });
+
+  test('falls back to js/ts usage resolution when definition providers return nothing', async () => {
+    class NoDefinitionDocumentationService extends DocumentationService {
+      public override async queryOtherDefinitionProviders(): Promise<Array<vscode.Location | vscode.LocationLink>> {
+        return [];
+      }
+    }
+
+    const usageOnlyService = new NoDefinitionDocumentationService(
+      new LanguageRegistry([
+        new CppLanguageModule(),
+        new CSharpLanguageModule(),
+        new JsTsLanguageModule(),
+        new PythonLanguageModule()
+      ]),
+      new DocIndex()
+    );
+
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+
+    const tsEditor = await openEditor('showcase/ts/showcase.ts');
+    const tsCandidates = await usageOnlyService.resolveDocumentationCandidates(
+      tsEditor.document,
+      positionInSnippet(tsEditor.document, 'new ShowcaseVector(-4);', 'ShowcaseVector'),
+      3
+    );
+    assert.strictEqual(tsCandidates.length, 1);
+    assert.strictEqual(tsCandidates[0].source, 'usage');
+    assert.strictEqual(tsCandidates[0].target.symbol.canonicalSignature, 'ShowcaseVector');
+    assert.match(tsCandidates[0].entry?.body ?? '', /Concrete TypeScript showcase class/);
+
+    const jsEditor = await openEditor('showcase/js/showcase.js');
+    const jsCandidates = await usageOnlyService.resolveDocumentationCandidates(
+      jsEditor.document,
+      positionInSnippet(jsEditor.document, 'new ShowcaseCounter();', 'ShowcaseCounter'),
+      3
+    );
+    assert.strictEqual(jsCandidates.length, 1);
+    assert.strictEqual(jsCandidates[0].source, 'usage');
+    assert.strictEqual(jsCandidates[0].target.symbol.canonicalSignature, 'ShowcaseCounter');
+    assert.match(jsCandidates[0].entry?.body ?? '', /Small JavaScript showcase class/);
+  });
+
+  test('showcase editor projects expose js/ts definitions when the built-in language service is available', async () => {
+    await configureWorkspace({ codeRoot: '.', docsRoot: 'docs/api' });
+
+    const tsEditor = await openEditor('showcase/ts/showcase.ts');
+    const tsDefinitions = await definitionsAt(
+      tsEditor,
+      positionInSnippet(tsEditor.document, 'new ShowcaseVector(-4);', 'ShowcaseVector')
+    );
+    assert.ok(tsDefinitions.some((definition) => definition.uri.fsPath.endsWith('/showcase/ts/showcase.ts')));
+
+    const jsEditor = await openEditor('showcase/js/showcase.js');
+    const jsDefinitions = await definitionsAt(
+      jsEditor,
+      positionInSnippet(jsEditor.document, 'new ShowcaseCounter();', 'ShowcaseCounter')
+    );
+    assert.ok(jsDefinitions.some((definition) => definition.uri.fsPath.endsWith('/showcase/js/showcase.js')));
   });
 });

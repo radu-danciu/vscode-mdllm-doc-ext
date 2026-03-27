@@ -126,6 +126,15 @@ Self-hosted mirrored documentation entry used for runtime lookup and repo dogfoo
 
 ---
 
+### `LanguageModule.resolveUsageSymbol(context: SymbolContext) -> Promise<ResolvedSymbol | null>`
+
+Brief: Optionally resolves a usage-site symbol when direct declaration lookup is unavailable.
+
+Details:
+Self-hosted mirrored documentation entry used for runtime lookup and repo dogfooding.
+
+---
+
 ### `LanguageModule.listSymbols(context: SymbolEnumerationContext) -> Promise<ResolvedSymbol[]>`
 
 Brief: Enumerates the documentable symbols in a file.

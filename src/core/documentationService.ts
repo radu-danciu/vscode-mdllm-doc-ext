@@ -18,7 +18,7 @@ export interface ResolvedDocumentationTarget {
 export interface ResolvedDocumentationCandidate {
   target: ResolvedDocumentationTarget;
   entry: DocEntry | null;
-  source: 'direct' | 'definition';
+  source: 'direct' | 'definition' | 'usage';
 }
 
 interface DocumentPosition {
@@ -169,7 +169,27 @@ export class DocumentationService {
       ];
     }
 
-    return this.resolveCandidatesFromDefinitions(document, position, maxCandidates);
+    const definitionCandidates = await this.resolveCandidatesFromDefinitions(
+      document,
+      position,
+      maxCandidates
+    );
+    if (definitionCandidates.length > 0) {
+      return definitionCandidates;
+    }
+
+    const usageTarget = await this.resolveUsageAt(document, position);
+    if (!usageTarget) {
+      return [];
+    }
+
+    return [
+      {
+        target: usageTarget,
+        entry: await this.findEntry(usageTarget),
+        source: 'usage'
+      }
+    ];
   }
 
   public async queryOtherHoverProviders(
@@ -308,6 +328,53 @@ export class DocumentationService {
     }
 
     return candidates;
+  }
+
+  private async resolveUsageAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+  ): Promise<ResolvedDocumentationTarget | null> {
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    if (!workspaceFolder) {
+      return null;
+    }
+
+    const config = getConfig(workspaceFolder);
+    const module = this.registry.getModuleForDocument(document);
+    if (!module?.resolveUsageSymbol) {
+      return null;
+    }
+
+    const symbol = await module.resolveUsageSymbol({
+      document,
+      position,
+      workspaceFolder,
+      config
+    });
+    if (!symbol) {
+      return null;
+    }
+
+    const mapping = mapSourceToDocs(
+      workspaceFolder,
+      document.uri,
+      config,
+      module.getLangBucket(document, config)
+    );
+    if (!mapping) {
+      return null;
+    }
+
+    symbol.sourceRelativePath = mapping.sourceRelativePath;
+
+    return {
+      document,
+      workspaceFolder,
+      config,
+      module,
+      symbol,
+      mapping
+    };
   }
 
   private async documentPositionFromDefinition(
