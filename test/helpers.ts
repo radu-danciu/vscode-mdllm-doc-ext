@@ -207,3 +207,24 @@ export async function readRelativeFile(relativePath: string): Promise<string> {
 export function relativeFsPath(uri: vscode.Uri): string {
   return path.relative(repoRoot(), uri.fsPath).replace(/\\/g, '/');
 }
+
+export async function waitFor(
+  assertion: () => void | Promise<void>,
+  timeoutMs = 3000,
+  intervalMs = 50
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  let lastError: unknown;
+
+  while (Date.now() < deadline) {
+    try {
+      await assertion();
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Timed out waiting for condition.');
+}

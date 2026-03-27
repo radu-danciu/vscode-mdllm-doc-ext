@@ -25,7 +25,7 @@ Formatted showcase text.
 
 ---
 
-### `Task<string> Showcase.Services.Calculator.DescribeAsync(Guid id)`
+### `Task<string> Showcase.Services.Calculator.DescribeTaskAsync(Guid id)`
 
 Brief: Builds an asynchronous showcase description from an identifier.
 

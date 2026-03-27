@@ -8,6 +8,7 @@ import { ExternalDocsDefinitionProvider } from './core/definitionProvider';
 import { ExternalDocsHoverProvider } from './core/hoverProvider';
 import { LanguageRegistry } from './core/languageRegistry';
 import { ExternalDocsRenameProvider } from './core/renameProvider';
+import { RenameSyncService } from './core/renameSyncService';
 import { CppLanguageModule, CSharpLanguageModule, JsTsLanguageModule, PythonLanguageModule } from './languages';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -19,6 +20,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   ]);
   const docIndex = new DocIndex();
   const documentationService = new DocumentationService(registry, docIndex);
+  const renameSyncService = new RenameSyncService(documentationService, registry);
   const selector = registry.getModules().flatMap((module) =>
     module.languageIds.map((language) => ({ language, scheme: 'file' as const }))
   );
@@ -30,6 +32,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       new ExternalDocsDefinitionProvider(documentationService)
     ),
     vscode.languages.registerRenameProvider(selector, new ExternalDocsRenameProvider(documentationService)),
+    renameSyncService,
     registerCreateSymbolDocumentationCommand(documentationService),
     registerOpenSymbolDocumentationCommand(documentationService),
     registerRebuildIndexCommand(documentationService),
