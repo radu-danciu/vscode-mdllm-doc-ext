@@ -67,17 +67,45 @@ async function githubRequest(pathname, token) {
   return response.json();
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForCheck(check, options) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= options.attempts; attempt += 1) {
+    try {
+      return await check();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.attempts) {
+        await sleep(options.delayMs);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 async function verifyGithubRelease(rootDir = process.cwd(), options = {}) {
   const info = getReleaseInfo(rootDir);
   const repository = parseRepository(rootDir, options.repo);
   const tagName = options.tag ?? process.env.GITHUB_REF_NAME ?? info.gitTag;
   const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? process.env.GITHUB_PAT ?? '';
   const artifactName = `${info.packageName}-${tagName.replace(/^v/, '')}.vsix`;
+  const attempts = Number(process.env.GITHUB_RELEASE_VERIFY_ATTEMPTS ?? options.attempts ?? 12);
+  const delayMs = Number(process.env.GITHUB_RELEASE_VERIFY_DELAY_MS ?? options.delayMs ?? 5000);
 
-  const release = await githubRequest(`/repos/${repository}/releases/tags/${encodeURIComponent(tagName)}`, token);
-  if (!release) {
-    throw new Error(`No GitHub release exists for tag ${tagName}.`);
-  }
+  const release = await waitForCheck(async () => {
+    const result = await githubRequest(
+      `/repos/${repository}/releases/tags/${encodeURIComponent(tagName)}`,
+      token
+    );
+    if (!result) {
+      throw new Error(`No GitHub release exists for tag ${tagName}.`);
+    }
+    return result;
+  }, { attempts, delayMs });
 
   if (release.draft) {
     throw new Error(`GitHub release ${tagName} is still a draft.`);
@@ -92,14 +120,16 @@ async function verifyGithubRelease(rootDir = process.cwd(), options = {}) {
     throw new Error(`GitHub release ${tagName} is missing asset ${artifactName}.`);
   }
 
-  const latest = await githubRequest(`/repos/${repository}/releases/latest`, token);
-  if (!latest) {
-    throw new Error(`GitHub latest release lookup failed for ${repository}.`);
-  }
-
-  if (latest.tag_name !== tagName) {
-    throw new Error(`GitHub latest release points to ${latest.tag_name}, expected ${tagName}.`);
-  }
+  const latest = await waitForCheck(async () => {
+    const result = await githubRequest(`/repos/${repository}/releases/latest`, token);
+    if (!result) {
+      throw new Error(`GitHub latest release lookup failed for ${repository}.`);
+    }
+    if (result.tag_name !== tagName) {
+      throw new Error(`GitHub latest release points to ${result.tag_name}, expected ${tagName}.`);
+    }
+    return result;
+  }, { attempts, delayMs });
 
   return {
     repository,
