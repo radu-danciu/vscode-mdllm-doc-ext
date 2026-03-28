@@ -55,3 +55,4 @@ jobs:
         with:
           files: ${{ steps.release_info.outputs.artifact_path }}
           generate_release_notes: true
+          make_latest: true
