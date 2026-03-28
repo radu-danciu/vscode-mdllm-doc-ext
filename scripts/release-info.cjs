@@ -7,6 +7,11 @@ function readPackageJson(rootDir) {
   return JSON.parse(fs.readFileSync(packagePath, 'utf8'));
 }
 
+function readVersionFile(rootDir) {
+  const versionPath = path.join(rootDir, 'VERSION');
+  return fs.readFileSync(versionPath, 'utf8').trim();
+}
+
 function assertSemver(version) {
   if (!/^\d+\.\d+\.\d+$/.test(version)) {
     throw new Error(`package.json version must use major.minor.patch. Received "${version}".`);
@@ -25,12 +30,18 @@ function getGitSha(rootDir, ref = 'HEAD') {
 
 function getReleaseInfo(rootDir = process.cwd(), ref = 'HEAD') {
   const pkg = readPackageJson(rootDir);
-  assertSemver(pkg.version);
+  const version = readVersionFile(rootDir);
+  assertSemver(version);
+  if (pkg.version !== version) {
+    throw new Error(
+      `VERSION (${version}) and package.json version (${pkg.version}) must match before release packaging.`
+    );
+  }
   const gitSha = getGitSha(rootDir, ref);
-  const releaseVersion = `${pkg.version}.${gitSha}`;
+  const releaseVersion = `${version}.${gitSha}`;
   return {
     packageName: pkg.name,
-    packageVersion: pkg.version,
+    packageVersion: version,
     gitSha,
     releaseVersion,
     gitTag: `v${releaseVersion}`,
@@ -72,5 +83,6 @@ if (require.main === module) {
 module.exports = {
   getReleaseInfo,
   assertSemver,
-  getGitSha
+  getGitSha,
+  readVersionFile
 };

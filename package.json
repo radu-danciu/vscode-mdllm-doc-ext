@@ -2,7 +2,7 @@
   "name": "vscode-mdllm-doc-ext",
   "displayName": "External Markdown Docs",
   "description": "VS Code extension for hover docs and documentation navigation backed by external Markdown files.",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "publisher": "SprocketInc",
   "author": "Radu Danciu <radu.danciu@sprocket.ro>",
   "license": "MIT",

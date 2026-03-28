@@ -8,7 +8,7 @@ public sealed class Calculator {
         return $"showcase:{label}";
     }
 
-    public Task<string> DescribeTaskAsync(Guid id) {
+    public Task<string> DescribeAsync(Guid id) {
         return Task.FromResult(Format(id.ToString("N")));
     }
 }
@@ -17,7 +17,7 @@ public static class ShowcaseUsage {
     public static async Task<string> RunAsync() {
         var calculator = new Calculator();
         calculator.Format("csharp");
-        return await calculator.DescribeTaskAsync(Guid.Empty);
+        return await calculator.DescribeAsync(Guid.Empty);
     }
 }
 

@@ -95,8 +95,9 @@ All modules emit the same general Markdown shape:
 
 ## Release process
 
-- Keep `package.json` at a normal semver version: `major.minor.patch`.
-- Use `npm run release:bump -- <major|minor|patch|x.y.z>` to prepare the next base version.
+- Keep `VERSION` and `package.json` aligned on a normal semver version: `major.minor.patch`.
+- Treat `VERSION` as the canonical plaintext source and update it alongside feature/fix commits so release tags are cut from an already-accounted-for base version.
+- Use `npm run release:bump -- <major|minor|patch|x.y.z>` to update both `VERSION` and `package.json` for the next base version.
 - Commit the release change.
 - Use `npm run release:tag` on the release commit to create `vmajor.minor.patch.git_sha`.
 - Push with `git push --follow-tags`.
