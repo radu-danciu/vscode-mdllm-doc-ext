@@ -3,7 +3,7 @@
 *This repository was put together using an agentic LLM AI framework. If that offends you in any way, you are free to not use it.*
 
 [![CI](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/ci.yml)
-[![Release](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/release-build.yml/badge.svg)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/release-build.yml)
+[![Release](https://img.shields.io/github/v/release/radu-danciu/vscode-mdllm-doc-ext?display_name=tag)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/releases/latest)
 
 Keep symbol documentation in Markdown files outside source code, while still getting hover docs, click-through navigation, and quick stub creation inside VS Code.
 
