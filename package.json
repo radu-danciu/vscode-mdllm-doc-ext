@@ -125,6 +125,7 @@
     "release:bump": "node ./scripts/bump-version.cjs",
     "release:tag": "node ./scripts/tag-release.cjs",
     "release:verify-tag": "node ./scripts/verify-release-tag.cjs",
+    "release:verify-github": "node ./scripts/verify-github-release.cjs",
     "package:release": "node ./scripts/package-release.cjs",
     "publish:release": "node ./scripts/publish-release.cjs"
   },

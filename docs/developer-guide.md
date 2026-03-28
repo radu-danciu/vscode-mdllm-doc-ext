@@ -102,7 +102,8 @@ All modules emit the same general Markdown shape:
 - Use `npm run release:tag` on the release commit to create `vmajor.minor.patch.git_sha`.
 - Push with `git push --follow-tags`.
 - `CI` validates the repository on pushes and pull requests.
-- `Release Build` validates the tag format, reruns `npm run check`, packages the tagged build, and uploads the VSIX back to GitHub.
+- `Release Build` validates the tag format, reruns `npm run check`, packages the tagged build, publishes the GitHub release, and verifies that `/releases/latest` and the VSIX asset are correct.
+- `Release Repair` can recreate or normalize a GitHub release from an existing tag if GitHub release state drifts from tags.
 - `Marketplace Publish` is separate, secret-gated by `VSCE_PAT`, and publishes a packaged tagged VSIX to the VS Code Marketplace.
 - Changing `package.json.name` changes the extension identity for VS Code and Marketplace update purposes.
 - Local publish remains optional and is intentionally outside the default repository workflow.

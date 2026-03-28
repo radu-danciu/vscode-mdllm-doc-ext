@@ -2,8 +2,8 @@
 
 *This repository was put together using an agentic LLM AI framework. If that offends you in any way, you are free to not use it.*
 
-[![CI](https://img.shields.io/github/actions/workflow/status/radu-danciu/vscode-mdllm-doc-ext/ci.yml?branch=main&label=CI)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/ci.yml?query=branch%3Amain)
-[![Release](https://img.shields.io/github/v/tag/radu-danciu/vscode-mdllm-doc-ext?label=Release&sort=semver)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/releases)
+[![CI](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
+[![Release](https://img.shields.io/github/v/release/radu-danciu/vscode-mdllm-doc-ext?display_name=tag&label=Release)](https://github.com/radu-danciu/vscode-mdllm-doc-ext/releases/latest)
 
 Keep symbol documentation in Markdown files outside source code, while still getting hover docs, click-through navigation, and quick stub creation inside VS Code.
 
@@ -127,11 +127,13 @@ Useful commands:
 
 - `npm run check`
 - `npm run release:info`
+- `npm run release:verify-github` after publishing, with `GITHUB_TOKEN` or `GH_TOKEN` available
 - `npm run package:vsix`
 - `npm run package:release`
 - `npm run publish:release` when publishing locally on purpose
 
-GitHub release packaging and GitHub release assets live in the `Release Build` workflow, which reruns `npm run check` before packaging.
+GitHub release packaging and GitHub release assets live in the `Release Build` workflow, which reruns `npm run check` before packaging and then verifies that the release exists, has the VSIX attached, and is the GitHub Latest release.
+`Release Repair` can publish or repair a GitHub release from an existing tag without retagging.
 Marketplace publishing is a separate `Marketplace Publish` workflow and expects a repository secret named `VSCE_PAT`. No secret material is stored in this repository.
 Tagged releases upload the packaged `.vsix` back to GitHub as both an Actions artifact and a GitHub release asset.
 
